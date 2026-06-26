@@ -1,4 +1,5 @@
 /** Application entry point: mounts AppShell and, in development, starts the MSW worker. */
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -16,9 +17,13 @@ async function startApp(): Promise<void> {
         throw new Error("Root element #root is missing from index.html");
     }
 
+    const queryClient = new QueryClient();
+
     createRoot(rootElement).render(
         <StrictMode>
-            <AppShell />
+            <QueryClientProvider client={queryClient}>
+                <AppShell />
+            </QueryClientProvider>
         </StrictMode>,
     );
 }
