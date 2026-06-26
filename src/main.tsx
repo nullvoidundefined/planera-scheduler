@@ -10,6 +10,10 @@ async function startApp(): Promise<void> {
     if (import.meta.env.DEV) {
         const { worker } = await import("./mocks/browser");
         await worker.start({ onUnhandledRequest: "bypass" });
+
+        const { useScheduleStore } = await import("./state/scheduleStore");
+        (window as unknown as { __scheduleStore: typeof useScheduleStore }).__scheduleStore =
+            useScheduleStore;
     }
 
     const rootElement = document.getElementById("root");

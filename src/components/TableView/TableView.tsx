@@ -20,6 +20,7 @@ import type { JSX } from "react";
 import { registerGridModules } from "./registerGridModules";
 import type { TableRow } from "./toTableRows";
 import { toTableRows } from "./toTableRows";
+import { OPERATION_ORIGIN_TABLE } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { formatScheduleDate } from "../../services/formatScheduleDate";
 import { useScheduleStore } from "../../state/scheduleStore";
@@ -120,11 +121,14 @@ export function TableView(): JSX.Element {
     const onCellValueChanged = useCallback(
         (event: CellValueChangedEvent<TableRow>) => {
             if (event.colDef.field === DURATION_FIELD) {
-                dispatchOperation({
-                    activityId: event.data.id,
-                    durationDays: Number(event.newValue),
-                    kind: "resizeActivity",
-                });
+                dispatchOperation(
+                    {
+                        activityId: event.data.id,
+                        durationDays: Number(event.newValue),
+                        kind: "resizeActivity",
+                    },
+                    OPERATION_ORIGIN_TABLE,
+                );
             }
         },
         [dispatchOperation],
@@ -133,9 +137,17 @@ export function TableView(): JSX.Element {
     // USER -> STORE: toggle collapse in the shared store when AG-Grid group is opened/closed.
     const onRowGroupOpened = useCallback(
         (event: RowGroupOpenedEvent<TableRow>) => {
+            // Guard the collapse feedback loop: the STORE -> GRID effect calls
+            // node.setExpanded programmatically, which also fires this event but with
+            // no browser event attached. Dispatching for that api-driven change would
+            // flip the shared state back and oscillate forever. Only a user click or
+            // keypress carries event.event, so dispatch solely for those.
+            if (event.event === undefined || event.event === null) {
+                return;
+            }
             const rowId = event.node.id;
             if (rowId !== undefined && rowId !== null) {
-                dispatchOperation({ kind: "toggleCollapse", rowId });
+                dispatchOperation({ kind: "toggleCollapse", rowId }, OPERATION_ORIGIN_TABLE);
             }
         },
         [dispatchOperation],

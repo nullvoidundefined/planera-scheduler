@@ -6,6 +6,8 @@
  */
 import type { Dependency } from "./schedule";
 
+export type OperationOrigin = "gantt" | "table";
+
 export type Operation =
     | { activityId: string; durationDays: number; kind: "resizeActivity" }
     | { edge: Dependency; kind: "addDependency" }

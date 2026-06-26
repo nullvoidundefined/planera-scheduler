@@ -20,8 +20,10 @@ import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
 import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
+import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { useScheduleStore } from "../../state/scheduleStore";
+import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
 
 const DAY_SCALE_HEIGHT_PX = 27;
@@ -87,11 +89,15 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
         });
 
         const detachDrag = attachDragHandler();
+        const detachSelection = attachSelectionHandler();
         const unsubscribe = subscribeComputed(calendar);
+        const unsubscribeSelection = subscribeSelection();
 
         return () => {
             detachDrag();
+            detachSelection();
             unsubscribe();
+            unsubscribeSelection();
             gantt.clearAll();
         };
     }, [containerRef]);
@@ -116,21 +122,47 @@ function addTodayMarker(): void {
 function attachDragHandler(): () => void {
     const id = gantt.attachEvent("onAfterTaskDrag", (taskId) => {
         const task = gantt.getTask(taskId);
-        useScheduleStore.getState().dispatchOperation({
-            activityId: String(taskId),
-            durationDays: Number(task.duration),
-            kind: "resizeActivity",
-        });
+        useScheduleStore.getState().dispatchOperation(
+            {
+                activityId: String(taskId),
+                durationDays: Number(task.duration),
+                kind: "resizeActivity",
+            },
+            OPERATION_ORIGIN_GANTT,
+        );
+    });
+    return () => gantt.detachEvent(id);
+}
+
+function attachSelectionHandler(): () => void {
+    const id = gantt.attachEvent("onTaskSelected", (taskId) => {
+        useScheduleSelection.getState().selectActivity(String(taskId));
     });
     return () => gantt.detachEvent(id);
 }
 
 function subscribeComputed(calendar: ReturnType<typeof createCalendar>): () => void {
     return useScheduleStore.subscribe((state, previous) => {
-        if (state.computed === previous.computed && state.graph === previous.graph) {
+        if (state.computed === previous.computed) {
+            return;
+        }
+        // Skip echoing the Gantt's own drag: the bar already reflects the user's
+        // drag, so re-applying the store update it triggered would be redundant work.
+        if (state.lastOperationOrigin === OPERATION_ORIGIN_GANTT) {
             return;
         }
         applyComputedToGantt(state.computed, calendar);
+    });
+}
+
+function subscribeSelection(): () => void {
+    return useScheduleSelection.subscribe((state, previous) => {
+        if (state.selectedActivityId === previous.selectedActivityId) {
+            return;
+        }
+        if (state.selectedActivityId !== null && gantt.isTaskExists(state.selectedActivityId)) {
+            gantt.selectTask(state.selectedActivityId);
+        }
     });
 }
 
@@ -142,11 +174,15 @@ function applyComputedToGantt(
         for (const [id, entry] of computed) {
             if (gantt.isTaskExists(id)) {
                 const task = gantt.getTask(id);
-                task.start_date = calendar.dateFromIndex(entry.earlyStart);
-                task.duration = Math.max(
-                    entry.earlyFinish - entry.earlyStart,
-                    MIN_BAR_DURATION_DAYS,
+                // Set both endpoints, not duration: DHTMLX renders the bar from
+                // start_date/end_date and recomputes duration from them on update, so
+                // a duration-only assignment is discarded and the bar never resizes.
+                const endIndex = Math.max(
+                    entry.earlyFinish,
+                    entry.earlyStart + MIN_BAR_DURATION_DAYS,
                 );
+                task.start_date = calendar.dateFromIndex(entry.earlyStart);
+                task.end_date = calendar.dateFromIndex(endIndex);
                 gantt.updateTask(id);
             }
         }

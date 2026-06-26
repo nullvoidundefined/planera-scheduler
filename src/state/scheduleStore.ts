@@ -16,8 +16,9 @@ import { create } from "zustand";
 import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
 import { detectCycle } from "../services/cpm/detectCycle";
 import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
+import { createCpmWorker } from "../workers/createCpmWorker";
 import { handleWorkerMessage } from "../workers/handleWorkerMessage";
-import type { Operation } from "../types/operation";
+import type { Operation, OperationOrigin } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
 import type { CpmWorkerRequest } from "../workers/cpmWorker";
 
@@ -25,17 +26,27 @@ interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
     graph: ScheduleGraph;
-    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false };
+    lastOperationOrigin: OperationOrigin | null;
+    dispatchOperation(
+        operation: Operation,
+        origin?: OperationOrigin,
+    ): { ok: true } | { cycle: string[]; ok: false };
     loadGraph(graph: ScheduleGraph): void;
-    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void;
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void;
 }
 
 export const useScheduleStore = create<ScheduleState>((set, get) => ({
     collapsed: new Set<string>(),
     computed: new Map<string, ComputedActivity>(),
-    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false } {
+    dispatchOperation(
+        operation: Operation,
+        origin?: OperationOrigin,
+    ): { ok: true } | { cycle: string[]; ok: false } {
         if (operation.kind === "toggleCollapse") {
-            set((state) => ({ collapsed: toggleMembership(state.collapsed, operation.rowId) }));
+            set((state) => ({
+                collapsed: toggleMembership(state.collapsed, operation.rowId),
+                lastOperationOrigin: origin ?? null,
+            }));
             return { ok: true };
         }
 
@@ -57,20 +68,26 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
             changedActivityIds,
             get().computed,
         );
-        set({ computed: mergeComputedDelta(get().computed, earlyDelta), graph });
+        set({
+            computed: mergeComputedDelta(get().computed, earlyDelta),
+            graph,
+            lastOperationOrigin: origin ?? null,
+        });
 
         // Phase 2 (asynchronous worker, or synchronous fallback): the authoritative
         // global pass that corrects float and the critical flag across the whole
-        // schedule, including activities outside the cone.
-        get().reconcileGlobalPass(graph, operation);
+        // schedule, including activities outside the cone. The token orders worker
+        // responses so a slow, stale delta cannot overwrite a newer authoritative state.
+        get().reconcileGlobalPass(graph, operation, nextDispatchToken());
         return { ok: true };
     },
     graph: { activities: [], dependencies: [] },
+    lastOperationOrigin: null,
     loadGraph(graph: ScheduleGraph): void {
         const { computed } = handleWorkerMessage({ graph, kind: "full" }, new Map());
-        set({ collapsed: new Set<string>(), computed, graph });
+        set({ collapsed: new Set<string>(), computed, graph, lastOperationOrigin: null });
     },
-    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void {
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void {
         const worker = getCpmWorker();
         if (worker === null) {
             const { delta } = handleWorkerMessage(
@@ -82,6 +99,11 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
         }
 
         worker.onmessage = (event: MessageEvent<ComputedActivity[]>): void => {
+            // Drop a stale delta: a newer dispatch already advanced the token, so this
+            // late worker response must not overwrite the newer authoritative state.
+            if (dispatchToken < latestDispatchToken) {
+                return;
+            }
             set((state) => ({ computed: mergeComputedDelta(state.computed, event.data) }));
         };
         const request: CpmWorkerRequest = {
@@ -94,6 +116,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
 }));
 
 let cpmWorker: Worker | null = null;
+let latestDispatchToken = 0;
 let workerInitialized = false;
 
 function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): ScheduleGraph {
@@ -130,12 +153,9 @@ function getCpmWorker(): Worker | null {
     return cpmWorker;
 }
 
-function createCpmWorker(): Worker | null {
-    try {
-        return new Worker(new URL("../workers/cpmWorker.ts", import.meta.url), { type: "module" });
-    } catch {
-        return null;
-    }
+function nextDispatchToken(): number {
+    latestDispatchToken += 1;
+    return latestDispatchToken;
 }
 
 function mergeComputedDelta(

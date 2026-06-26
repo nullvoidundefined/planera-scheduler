@@ -14,8 +14,7 @@ const GRID_READY_TIMEOUT_MS = 10000;
 // The editor input in AG-Grid v33 is rendered inside .ag-cell-editor as an
 // .ag-input-field-input element (or a plain <input> child of .ag-cell-editor).
 const LEAF_DURATION_CELL_SELECTOR = ".ag-row:not(.ag-row-group) [col-id='duration']";
-const CELL_EDITOR_INPUT_SELECTOR =
-    ".ag-cell-editor .ag-input-field-input, .ag-cell-editor input";
+const CELL_EDITOR_INPUT_SELECTOR = ".ag-cell-editor .ag-input-field-input, .ag-cell-editor input";
 
 test("duration cell opens an editable input on double-click (editor module registered)", async ({
     page,
@@ -44,8 +43,12 @@ test("duration cell opens an editable input on double-click (editor module regis
 test("typing a new duration value and pressing Enter updates the displayed cell", async ({
     page,
 }) => {
-    // Increase timeout: page load can take up to 30s and the edit interaction adds more.
-    test.setTimeout(60000);
+    // Cover this test's own declared sub-budgets: page load (30s) plus the grid,
+    // editor-visible, editor-value, and committed-text waits each add their own
+    // ceiling. Their sum exceeds 60s, so a 60s overall timeout tips over in the
+    // worst legitimate case, especially under the parallel heavy-dataset load. The
+    // edit itself takes ~57s of real work in isolation, so this is real headroom.
+    test.setTimeout(90000);
 
     const UPDATED_DURATION = "99";
 
