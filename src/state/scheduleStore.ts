@@ -1,18 +1,16 @@
 /**
  * Zustand store holding the single source of truth: the raw schedule graph
  * (stored inputs only), the computed cache (engine outputs, never persisted),
- * and the shared collapse set. dispatchOperation is two-phase: it applies the
- * operation to the raw graph, then PHASE 1 recomputes the downstream cone's early
- * dates synchronously (computeConeEarlyDates) and merges them at once so the edit
- * feels live, then PHASE 2 runs the authoritative global pass (handleWorkerMessage)
- * and merges its delta to correct float and the critical path. Task 8 adds cycle
- * rejection for addDependency; Task 11 routes phase 2 through the web worker with
- * this synchronous path as the fallback.
+ * and the shared collapse set. dispatchOperation applies the operation to the raw
+ * graph, runs the cycle gate for addDependency (rejecting without mutation if a
+ * cycle would be introduced), then runs the authoritative full pass via
+ * handleWorkerMessage and merges its delta to update float and the critical path.
+ * Task 11 routes the full pass through the web worker with this synchronous call
+ * as the worker-unavailable fallback.
  */
 import { create } from "zustand";
 
-import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
-import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
+import { detectCycle } from "../services/cpm/detectCycle";
 import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 import type { Operation } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
@@ -20,7 +18,7 @@ import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
-    dispatchOperation(operation: Operation): { ok: boolean };
+    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false };
     graph: ScheduleGraph;
     loadGraph(graph: ScheduleGraph): void;
 }
@@ -28,29 +26,26 @@ interface ScheduleState {
 export const useScheduleStore = create<ScheduleState>((set, get) => ({
     collapsed: new Set<string>(),
     computed: new Map<string, ComputedActivity>(),
-    dispatchOperation(operation: Operation): { ok: boolean } {
+    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false } {
         if (operation.kind === "toggleCollapse") {
             set((state) => ({ collapsed: toggleMembership(state.collapsed, operation.rowId) }));
             return { ok: true };
         }
 
-        const changedActivityIds = selectChangedActivityIds(get().graph, operation);
         const graph = applyOperationToGraph(get().graph, operation);
 
-        // Phase 1 (local, immediate, main thread): recompute only the downstream cone's
-        // early dates and merge them at once so the edit feels live.
-        const earlyDelta = computeConeEarlyDates(
-            selectLeafActivities(graph),
-            changedActivityIds,
+        if (operation.kind === "addDependency") {
+            const cycle = detectCycle(graph);
+            if (cycle !== null) {
+                return { cycle, ok: false };
+            }
+        }
+
+        const { computed, delta } = handleWorkerMessage(
+            { graph, kind: "operation", operation },
             get().computed,
         );
-        set({ computed: mergeComputedDelta(get().computed, earlyDelta), graph });
-
-        // Phase 2 (global, a beat later): the authoritative full pass that corrects float
-        // and the critical flag. Task 7 runs it synchronously; Task 11 posts it to the
-        // worker and keeps this synchronous call as the worker-unavailable fallback.
-        const { delta } = handleWorkerMessage({ graph, kind: "operation", operation }, get().computed);
-        set({ computed: mergeComputedDelta(get().computed, delta) });
+        set({ computed: mergeComputedDelta(computed, delta), graph });
         return { ok: true };
     },
     graph: { activities: [], dependencies: [] },
@@ -92,21 +87,6 @@ function mergeComputedDelta(
         next.set(entry.id, entry);
     }
     return next;
-}
-
-function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): string[] {
-    switch (operation.kind) {
-        case "addDependency":
-            return [operation.edge.successorId];
-        case "removeDependency": {
-            const removed = graph.dependencies.find((edge) => edge.id === operation.edgeId);
-            return removed === undefined ? [] : [removed.successorId];
-        }
-        case "resizeActivity":
-            return [operation.activityId];
-        case "toggleCollapse":
-            return [];
-    }
 }
 
 function toggleMembership(members: Set<string>, id: string): Set<string> {
