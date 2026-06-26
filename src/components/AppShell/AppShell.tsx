@@ -8,6 +8,7 @@ import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 import type { JSX } from "react";
 
 import { GanttView } from "../GanttView/GanttView";
+import { TableView } from "../TableView/TableView";
 import { useScheduleQuery } from "../../api/useScheduleQuery";
 
 export function AppShell(): JSX.Element {
@@ -26,8 +27,13 @@ export function AppShell(): JSX.Element {
                 </div>
             ) : null}
             {!isPending && !isError ? (
-                <div style={{ height: "80vh" }}>
-                    <GanttView />
+                <div style={{ display: "flex", height: "80vh" }}>
+                    <div style={{ flex: 1 }}>
+                        <TableView />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <GanttView />
+                    </div>
                 </div>
             ) : null}
         </main>
