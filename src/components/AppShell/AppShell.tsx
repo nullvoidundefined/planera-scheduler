@@ -3,8 +3,11 @@
  * useScheduleQuery and renders pending and error states with retry. The
  * split-pane Table/Gantt body is filled in Task 14.
  */
+import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
+
 import type { JSX } from "react";
 
+import { GanttView } from "../GanttView/GanttView";
 import { useScheduleQuery } from "../../api/useScheduleQuery";
 
 export function AppShell(): JSX.Element {
@@ -20,6 +23,11 @@ export function AppShell(): JSX.Element {
                     <button type="button" onClick={refetch}>
                         Retry
                     </button>
+                </div>
+            ) : null}
+            {!isPending && !isError ? (
+                <div style={{ height: "80vh" }}>
+                    <GanttView />
                 </div>
             ) : null}
         </main>

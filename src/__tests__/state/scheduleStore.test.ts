@@ -89,7 +89,7 @@ describe("useScheduleStore", () => {
         expect(useScheduleStore.getState().collapsed.has("ph")).toBe(false);
     });
 
-    test("resize recomputes downstream early dates (phase 1) and corrects global float and critical (phase 2)", () => {
+    test("resize settles to an authoritative final cache: fresh early dates plus corrected global float and critical", () => {
         useScheduleStore.getState().loadGraph(structuredClone(FLOAT_GRAPH));
 
         // Before: S->A(4)->C(5)->E is the critical chain (length 9); S->B(2)->D(3)->E carries float 4.
@@ -103,13 +103,14 @@ describe("useScheduleStore", () => {
         });
         const { computed } = useScheduleStore.getState();
 
-        // Phase 1 (local, synchronous): the downstream cone of B (B, D, E) has fresh early dates.
+        // The net final cache (after both phases settle): the downstream cone of B
+        // (B, D, E) carries fresh early dates.
         expect(computed.get("B")?.earlyFinish).toBe(8);
         expect(computed.get("D")?.earlyStart).toBe(8);
         expect(computed.get("E")?.earlyStart).toBe(11);
 
-        // Phase 2 (global): B->D->E is now critical (length 11); A and C sit OUTSIDE B's cone
-        // yet their float and critical flag are corrected by the full pass.
+        // B->D->E is now critical (length 11); A and C sit OUTSIDE B's cone yet their
+        // float and critical flag are corrected by the authoritative global pass.
         expect(computed.get("B")?.isCritical).toBe(true);
         expect(computed.get("D")?.isCritical).toBe(true);
         expect(computed.get("A")?.isCritical).toBe(false);

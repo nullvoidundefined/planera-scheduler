@@ -1,26 +1,33 @@
 /**
  * Zustand store holding the single source of truth: the raw schedule graph
- * (stored inputs only), the computed cache (engine outputs, never persisted),
- * and the shared collapse set. dispatchOperation applies the operation to the raw
- * graph, runs the cycle gate for addDependency (rejecting without mutation if a
- * cycle would be introduced), then runs the authoritative full pass via
- * handleWorkerMessage and merges its delta to update float and the critical path.
- * Task 11 routes the full pass through the web worker with this synchronous call
- * as the worker-unavailable fallback.
+ * (stored inputs only), the computed cache (engine outputs, never persisted), and
+ * the shared collapse set. dispatchOperation is two-phase. PHASE 1 recomputes the
+ * downstream cone's early dates synchronously on the main thread
+ * (computeConeEarlyDates) and merges them at once, so the edit is visible before
+ * the worker responds. PHASE 2 runs the authoritative global pass that corrects
+ * float and the critical path: it posts to the CPM web worker when one exists and
+ * merges the worker's delta a beat later, falling back to a synchronous
+ * handleWorkerMessage pass when no Worker is available (jsdom, SSR). addDependency
+ * is gated by detectCycle against the prospective graph and rejected without
+ * mutation. The net final cache equals a full recompute on either phase-2 path.
  */
 import { create } from "zustand";
 
+import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
 import { detectCycle } from "../services/cpm/detectCycle";
+import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
 import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 import type { Operation } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
+import type { CpmWorkerRequest } from "../workers/cpmWorker";
 
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
-    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false };
     graph: ScheduleGraph;
+    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false };
     loadGraph(graph: ScheduleGraph): void;
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void;
 }
 
 export const useScheduleStore = create<ScheduleState>((set, get) => ({
@@ -32,6 +39,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
             return { ok: true };
         }
 
+        const changedActivityIds = selectChangedActivityIds(get().graph, operation);
         const graph = applyOperationToGraph(get().graph, operation);
 
         if (operation.kind === "addDependency") {
@@ -41,11 +49,20 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
             }
         }
 
-        const { computed, delta } = handleWorkerMessage(
-            { graph, kind: "operation", operation },
+        // Phase 1 (synchronous, main thread): recompute only the downstream cone's
+        // early dates and merge them at once so the edit is visible before the worker
+        // responds. Float and the critical flag stay stale on the cone for a beat.
+        const earlyDelta = computeConeEarlyDates(
+            selectLeafActivities(graph),
+            changedActivityIds,
             get().computed,
         );
-        set({ computed: mergeComputedDelta(computed, delta), graph });
+        set({ computed: mergeComputedDelta(get().computed, earlyDelta), graph });
+
+        // Phase 2 (asynchronous worker, or synchronous fallback): the authoritative
+        // global pass that corrects float and the critical flag across the whole
+        // schedule, including activities outside the cone.
+        get().reconcileGlobalPass(graph, operation);
         return { ok: true };
     },
     graph: { activities: [], dependencies: [] },
@@ -53,12 +70,39 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
         const { computed } = handleWorkerMessage({ graph, kind: "full" }, new Map());
         set({ collapsed: new Set<string>(), computed, graph });
     },
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void {
+        const worker = getCpmWorker();
+        if (worker === null) {
+            const { delta } = handleWorkerMessage(
+                { graph, kind: "operation", operation },
+                get().computed,
+            );
+            set({ computed: mergeComputedDelta(get().computed, delta) });
+            return;
+        }
+
+        worker.onmessage = (event: MessageEvent<ComputedActivity[]>): void => {
+            set((state) => ({ computed: mergeComputedDelta(state.computed, event.data) }));
+        };
+        const request: CpmWorkerRequest = {
+            graph,
+            operation,
+            previousComputed: [...get().computed.entries()],
+        };
+        worker.postMessage(request);
+    },
 }));
+
+let cpmWorker: Worker | null = null;
+let workerInitialized = false;
 
 function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): ScheduleGraph {
     switch (operation.kind) {
         case "addDependency":
-            return { activities: graph.activities, dependencies: [...graph.dependencies, operation.edge] };
+            return {
+                activities: graph.activities,
+                dependencies: [...graph.dependencies, operation.edge],
+            };
         case "removeDependency":
             return {
                 activities: graph.activities,
@@ -78,6 +122,22 @@ function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): Sche
     }
 }
 
+function getCpmWorker(): Worker | null {
+    if (!workerInitialized) {
+        cpmWorker = createCpmWorker();
+        workerInitialized = true;
+    }
+    return cpmWorker;
+}
+
+function createCpmWorker(): Worker | null {
+    try {
+        return new Worker(new URL("../workers/cpmWorker.ts", import.meta.url), { type: "module" });
+    } catch {
+        return null;
+    }
+}
+
 function mergeComputedDelta(
     computed: Map<string, ComputedActivity>,
     delta: ComputedActivity[],
@@ -87,6 +147,21 @@ function mergeComputedDelta(
         next.set(entry.id, entry);
     }
     return next;
+}
+
+function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): string[] {
+    switch (operation.kind) {
+        case "addDependency":
+            return [operation.edge.successorId];
+        case "removeDependency": {
+            const removed = graph.dependencies.find((edge) => edge.id === operation.edgeId);
+            return removed === undefined ? [] : [removed.successorId];
+        }
+        case "resizeActivity":
+            return [operation.activityId];
+        case "toggleCollapse":
+            return [];
+    }
 }
 
 function toggleMembership(members: Set<string>, id: string): Set<string> {

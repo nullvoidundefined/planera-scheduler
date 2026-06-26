@@ -1,19 +1,27 @@
 /**
- * Web-worker entry for CPM recompute. Holds the last computed cache as worker
- * state and delegates every message to the pure handleWorkerMessage, posting
- * back only the changed delta so the main thread batch-updates the minimum set
- * of rows and bars. The store falls back to synchronous compute if this worker
- * fails to initialize.
+ * Web-worker entry for CPM recompute. Receives an operation request carrying the
+ * graph, the operation, and the serialized previous computed cache (as Map
+ * entries), reconstructs the Map, delegates to the pure handleWorkerMessage, and
+ * posts back only the changed delta so the main thread batch-updates the minimum
+ * set of rows and bars. Holds no cross-message state: the store owns the
+ * authoritative cache and passes it on every request. The store falls back to a
+ * synchronous handleWorkerMessage call when this worker fails to initialize.
  */
-import type { ComputedActivity } from "../types/schedule";
-
 import { handleWorkerMessage } from "./handleWorkerMessage";
-import type { WorkerMessage } from "./handleWorkerMessage";
+import type { Operation } from "../types/operation";
+import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
 
-let previousComputed = new Map<string, ComputedActivity>();
+export interface CpmWorkerRequest {
+    graph: ScheduleGraph;
+    operation: Operation;
+    previousComputed: [string, ComputedActivity][];
+}
 
-self.onmessage = (event: MessageEvent<WorkerMessage>): void => {
-    const { computed, delta } = handleWorkerMessage(event.data, previousComputed);
-    previousComputed = computed;
+self.onmessage = (event: MessageEvent<CpmWorkerRequest>): void => {
+    const { graph, operation, previousComputed } = event.data;
+    const { delta } = handleWorkerMessage(
+        { graph, kind: "operation", operation },
+        new Map(previousComputed),
+    );
     self.postMessage(delta);
 };
