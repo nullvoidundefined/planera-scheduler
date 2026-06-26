@@ -17,6 +17,8 @@ const NEW_DURATION_DAYS = 60;
 // leaves on the main thread, then an async worker pass; under Playwright's parallel
 // browser load on the full dataset this needs real headroom, not a masked race.
 const PROPAGATION_TIMEOUT_MS = 20000;
+// Idle gap between phase-2 propagation polls; see pollUntil for why a real gap matters.
+const POLL_SETTLE_MS = 400;
 // Cover the test's own declared sub-budgets: page load, the first Gantt bar, then
 // two sequential 20s propagation polls (bar width, then downstream date). A 60s
 // ceiling sits below that sum and tips over in the worst legitimate case, so the
@@ -148,6 +150,107 @@ test.describe("two-way editing", () => {
             .toBeGreaterThan(target!.successorEarlyStartBefore!);
     });
 
+    test("a gantt-origin edit reflows the recomputed schedule into the Gantt", async ({ page }) => {
+        test.setTimeout(EDIT_TEST_TIMEOUT_MS);
+        await page.goto("/");
+        await expect(
+            page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
+        ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+        await expect(page.locator(".gantt_task_line").first()).toBeVisible({
+            timeout: GRID_READY_TIMEOUT_MS,
+        });
+
+        // Same sole-successor selection as the table-origin case: a successor tied to a
+        // single predecessor provably shifts when that predecessor lengthens.
+        const target = await page.evaluate(() => {
+            const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
+            if (store === undefined) {
+                return null;
+            }
+            const { activities, dependencies } = store.getState().graph;
+            const predecessorCount = new Map<string, number>();
+            for (const edge of dependencies) {
+                predecessorCount.set(
+                    edge.successorId,
+                    (predecessorCount.get(edge.successorId) ?? 0) + 1,
+                );
+            }
+            for (const activity of activities) {
+                if (activity.type !== "task" || activity.durationDays <= 0) {
+                    continue;
+                }
+                const soleSuccessor = dependencies.find(
+                    (edge) =>
+                        edge.predecessorId === activity.id &&
+                        predecessorCount.get(edge.successorId) === 1,
+                );
+                if (soleSuccessor === undefined) {
+                    continue;
+                }
+                const successorEarlyStart =
+                    store.getState().computed.get(soleSuccessor.successorId)?.earlyStart ?? null;
+                return {
+                    activityId: activity.id,
+                    successorEarlyStartBefore: successorEarlyStart,
+                    successorId: soleSuccessor.successorId,
+                };
+            }
+            return null;
+        });
+        expect(target).not.toBeNull();
+        expect(target!.successorEarlyStartBefore).not.toBeNull();
+
+        const ganttBar = page.locator(`.gantt_task_line[task_id="${target!.activityId}"]`);
+        await expect(ganttBar).toBeVisible();
+        const widthBefore = await readGanttBarWidth(page, target!.activityId);
+        expect(widthBefore).toBeGreaterThan(0);
+
+        // Drive the resize with the GANTT origin. The optimistic phase-1 update is
+        // suppressed in the Gantt (a real drag already shows the dragged bar), but the
+        // authoritative phase-2 merge must still reflow the recomputed schedule into the
+        // widget. Before the fix a gantt-origin dispatch suppressed BOTH phases, so the
+        // Gantt DOM never moved and downstream successors stayed stale.
+        await page.evaluate(
+            ({ activityId, durationDays }) => {
+                const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
+                store
+                    ?.getState()
+                    .dispatchOperation(
+                        { activityId, durationDays, kind: "resizeActivity" },
+                        "gantt",
+                    );
+            },
+            { activityId: target!.activityId, durationDays: NEW_DURATION_DAYS },
+        );
+
+        // The edited bar widens in the real Gantt DOM: the phase-2 reflow reached the
+        // widget despite the gantt origin, exercising the real subscribeComputed path.
+        // Polled with explicit settle gaps rather than expect.poll: the authoritative
+        // pass arrives on the CPM web worker's message, and only a real idle gap lets
+        // that message be dispatched and DHTMLX's frame-scheduled bar repaint flush; a
+        // back-to-back evaluate poll starves the worker handler and never observes it.
+        const widthAfter = await pollUntil(
+            page,
+            () => readGanttBarWidth(page, target!.activityId),
+            (width) => width > widthBefore,
+        );
+        expect(widthAfter).toBeGreaterThan(widthBefore);
+
+        // The downstream successor's computed early start moves later: the authoritative
+        // pass recomputed and reflowed the dependent cone, not just the edited bar.
+        const successorEarlyStartAfter = await pollUntil(
+            page,
+            () =>
+                page.evaluate((successorId) => {
+                    const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
+                    return store?.getState().computed.get(successorId)?.earlyStart ?? null;
+                }, target!.successorId),
+            (earlyStart) =>
+                earlyStart !== null && earlyStart > target!.successorEarlyStartBefore!,
+        );
+        expect(successorEarlyStartAfter).toBeGreaterThan(target!.successorEarlyStartBefore!);
+    });
+
     test("collapsing a phase propagates to the grid and does not oscillate", async ({ page }) => {
         await page.goto("/");
         await expect(
@@ -240,6 +343,35 @@ test.describe("two-way editing", () => {
         expect(outcome!.after).toBe(outcome!.before);
     });
 });
+
+// Poll a value through real idle gaps until it satisfies the predicate or the budget
+// runs out, returning the last read either way for the caller to assert on. The gap is
+// load-bearing: the authoritative phase-2 delta arrives on the CPM web worker's
+// message, and only a genuine idle interval lets that handler run; expect.poll's
+// back-to-back evaluate cadence starves it (observed: the store origin never clears).
+async function pollUntil<T>(
+    page: import("@playwright/test").Page,
+    read: () => Promise<T>,
+    predicate: (value: T) => boolean,
+): Promise<T> {
+    const deadline = Date.now() + PROPAGATION_TIMEOUT_MS;
+    let latest = await read();
+    while (!predicate(latest) && Date.now() < deadline) {
+        await page.waitForTimeout(POLL_SETTLE_MS);
+        latest = await read();
+    }
+    return latest;
+}
+
+async function readGanttBarWidth(
+    page: import("@playwright/test").Page,
+    taskId: string,
+): Promise<number> {
+    return page.evaluate((id) => {
+        const bar = document.querySelector(`.gantt_task_line[task_id="${id}"]`);
+        return bar === null ? 0 : bar.getBoundingClientRect().width;
+    }, taskId);
+}
 
 async function readCollapsedIds(page: import("@playwright/test").Page): Promise<string[]> {
     return page.evaluate(() => {

@@ -25,12 +25,12 @@ import type { CpmWorkerRequest } from "../workers/cpmWorker";
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
-    graph: ScheduleGraph;
-    lastOperationOrigin: OperationOrigin | null;
     dispatchOperation(
         operation: Operation,
         origin?: OperationOrigin,
     ): { ok: true } | { cycle: string[]; ok: false };
+    graph: ScheduleGraph;
+    lastOperationOrigin: OperationOrigin | null;
     loadGraph(graph: ScheduleGraph): void;
     reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void;
 }
@@ -94,7 +94,12 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
                 { graph, kind: "operation", operation },
                 get().computed,
             );
-            set({ computed: mergeComputedDelta(get().computed, delta) });
+            // Clear the origin alongside the authoritative phase-2 merge so the Gantt
+            // subscription applies this set: it skips only the optimistic phase-1
+            // gantt-origin update, which DHTMLX already shows on the dragged bar.
+            // Programmatic gantt.updateTask inside batchUpdate does not re-fire
+            // onAfterTaskDrag, so reapplying cannot echo back as a new operation.
+            set({ computed: mergeComputedDelta(get().computed, delta), lastOperationOrigin: null });
             return;
         }
 
@@ -104,7 +109,13 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
             if (dispatchToken < latestDispatchToken) {
                 return;
             }
-            set((state) => ({ computed: mergeComputedDelta(state.computed, event.data) }));
+            // Clear the origin with the authoritative phase-2 merge so the Gantt
+            // subscription reflows downstream successors and critical coloring; see the
+            // synchronous-fallback note above for why this cannot create an echo loop.
+            set((state) => ({
+                computed: mergeComputedDelta(state.computed, event.data),
+                lastOperationOrigin: null,
+            }));
         };
         const request: CpmWorkerRequest = {
             graph,

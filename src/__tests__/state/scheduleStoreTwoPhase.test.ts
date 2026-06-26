@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 
+import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { useScheduleStore } from "../../state/scheduleStore";
 import type { Activity, ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
 
@@ -75,5 +76,32 @@ describe("useScheduleStore two-phase recompute", () => {
         expect(afterPhaseTwo.get("A")?.isCritical).toBe(false);
         expect(afterPhaseTwo.get("A")?.totalFloat).toBe(2);
         expect(afterPhaseTwo.get("C")?.totalFloat).toBe(2);
+    });
+
+    test("a gantt-origin edit settles with a null origin so the Gantt subscription reflows successors", () => {
+        // The Gantt subscription skips an update only while lastOperationOrigin is
+        // "gantt" (the optimistic phase-1 set the dragged bar already shows). The
+        // authoritative phase-2 merge must clear the origin so the subscription applies
+        // it, repositioning the recomputed downstream successors and critical coloring.
+        const snapshots: { origin: typeof OPERATION_ORIGIN_GANTT | null }[] = [];
+        const unsubscribe = useScheduleStore.subscribe((state, previous) => {
+            if (state.computed !== previous.computed) {
+                snapshots.push({ origin: state.lastOperationOrigin });
+            }
+        });
+
+        useScheduleStore.getState().dispatchOperation(
+            { activityId: "B", durationDays: 8, kind: "resizeActivity" },
+            OPERATION_ORIGIN_GANTT,
+        );
+        unsubscribe();
+
+        // Phase 1 carries the gantt origin (suppressed in the Gantt), phase 2 clears it.
+        expect(snapshots[0]?.origin).toBe(OPERATION_ORIGIN_GANTT);
+        expect(snapshots[snapshots.length - 1]?.origin).toBeNull();
+        // The downstream successor E shifted to its recomputed position, the value the
+        // now-unsuppressed phase-2 subscription would reflow into the Gantt.
+        expect(useScheduleStore.getState().lastOperationOrigin).toBeNull();
+        expect(useScheduleStore.getState().computed.get("E")?.earlyStart).toBe(11);
     });
 });
