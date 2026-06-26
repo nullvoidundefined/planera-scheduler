@@ -1,7 +1,8 @@
 /**
  * Top-level application shell. Drives the initial schedule load through
- * useScheduleQuery and renders pending and error states with retry. The
- * split-pane Table/Gantt body is filled in Task 14.
+ * useScheduleQuery and renders pending and error states with retry. On success
+ * renders a side-by-side flex layout: TableView on the left, GanttView on
+ * the right, each occupying equal width at 80vh height.
  */
 import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 
