@@ -1,0 +1,33 @@
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+styled-system/
+
+# PandaCSS generated output
+src/styled-system/
+
+# Editor / OS
+.DS_Store
+*.local
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test artifacts
+playwright-report/
+test-results/
+.superpowers/
+
+# Env
+.env
+.env.*
+!.env.example
