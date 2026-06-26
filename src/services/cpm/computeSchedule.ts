@@ -121,7 +121,7 @@ function runForwardPass(
     return { earlyFinish, earlyStart };
 }
 
-function earlyStartFromDependency(
+export function earlyStartFromDependency(
     dependency: Dependency,
     predecessorEarlyStart: number,
     predecessorEarlyFinish: number,
