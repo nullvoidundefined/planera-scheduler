@@ -40,4 +40,12 @@ describe("ArchitectureRoute", () => {
             screen.getByRole("heading", { level: 2, name: "How I built this" }),
         ).toBeInTheDocument();
     });
+
+    test("renders the FAQ with its questions", () => {
+        renderRoute();
+        expect(screen.getByRole("heading", { level: 2, name: "FAQ" })).toBeInTheDocument();
+        expect(
+            screen.getByText("Why only the Gantt and table, not the whiteboard?"),
+        ).toBeInTheDocument();
+    });
 });

@@ -7,9 +7,11 @@
 import type { JSX } from "react";
 
 import { css } from "../../../styled-system/css";
+import { FaqList } from "../../components/FaqList/FaqList";
 import { ProseSection } from "../../components/ProseSection/ProseSection";
 import { AI_FIRST_SECTION } from "../../content/aiFirstContent";
 import { ARCHITECTURE_SECTIONS } from "../../content/architectureSections";
+import { FAQ_ENTRIES } from "../../content/faqContent";
 
 const INTRO =
     "This is my read, from the outside, of how the library-based half of Planera's frontend fits together: the Gantt and the table as two renderers over one CPM graph. I left the whiteboard out because it's a custom build with its own design problem. Where I'm reasoning about your internals rather than stating a fact, I've tried to say so.";
@@ -39,6 +41,15 @@ export function ArchitectureRoute(): JSX.Element {
                 <ProseSection key={section.id} section={section} />
             ))}
             <ProseSection section={AI_FIRST_SECTION} />
+            <section aria-labelledby="faq-heading" className={css({ margin: "8px 0 0" })}>
+                <h2
+                    className={css({ color: "ink", fontSize: "22px", margin: "0 0 12px" })}
+                    id="faq-heading"
+                >
+                    FAQ
+                </h2>
+                <FaqList entries={FAQ_ENTRIES} />
+            </section>
         </main>
     );
 }
