@@ -10,8 +10,15 @@
  */
 import { expect, test } from "@playwright/test";
 
-const GRID_READY_TIMEOUT_MS = 10000;
-const LOAD_TIMEOUT_MS = 30000;
+import {
+    GRID_READY_TIMEOUT_MS,
+    gotoSchedule,
+    LOAD_TIMEOUT_MS,
+    waitForFirstGanttBar,
+    waitForTreegrid,
+} from "./helpers/appReady";
+import type { ScheduleStoreWindow } from "./helpers/storeHandle";
+
 const NEW_DURATION_DAYS = 60;
 // Lengthening a near-root activity recomputes a downstream cone of thousands of
 // leaves on the main thread, then an async worker pass; under Playwright's parallel
@@ -27,43 +34,14 @@ const EDIT_TEST_TIMEOUT_MS =
     LOAD_TIMEOUT_MS + GRID_READY_TIMEOUT_MS + 2 * PROPAGATION_TIMEOUT_MS + 10000;
 const SETTLE_MS = 800;
 
-interface ComputedSnapshot {
-    earlyFinish: number;
-    earlyStart: number;
-    isCritical: boolean;
-}
-
-interface ScheduleStoreWindow {
-    __scheduleStore?: {
-        getState(): {
-            collapsed: Set<string>;
-            computed: Map<string, ComputedSnapshot>;
-            graph: {
-                activities: {
-                    durationDays: number;
-                    id: string;
-                    parentId: string | null;
-                    type: string;
-                }[];
-                dependencies: { id: string; predecessorId: string; successorId: string }[];
-            };
-            dispatchOperation(op: unknown, origin?: string): { ok: boolean };
-        };
-    };
-}
-
 test.describe("two-way editing", () => {
     test("a duration edit resizes the matching Gantt bar and shifts downstream dates", async ({
         page,
     }) => {
         test.setTimeout(EDIT_TEST_TIMEOUT_MS);
-        await page.goto("/");
-        await expect(
-            page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
-        ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
-        await expect(page.locator(".gantt_task_line").first()).toBeVisible({
-            timeout: GRID_READY_TIMEOUT_MS,
-        });
+        await gotoSchedule(page);
+        await waitForTreegrid(page);
+        await waitForFirstGanttBar(page);
 
         // Pick, from the store, the first task leaf whose successor depends on it
         // alone. With a single predecessor the successor's early start is tied
@@ -152,13 +130,9 @@ test.describe("two-way editing", () => {
 
     test("a gantt-origin edit reflows the recomputed schedule into the Gantt", async ({ page }) => {
         test.setTimeout(EDIT_TEST_TIMEOUT_MS);
-        await page.goto("/");
-        await expect(
-            page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
-        ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
-        await expect(page.locator(".gantt_task_line").first()).toBeVisible({
-            timeout: GRID_READY_TIMEOUT_MS,
-        });
+        await gotoSchedule(page);
+        await waitForTreegrid(page);
+        await waitForFirstGanttBar(page);
 
         // Same sole-successor selection as the table-origin case: a successor tied to a
         // single predecessor provably shifts when that predecessor lengthens.
@@ -245,17 +219,14 @@ test.describe("two-way editing", () => {
                     const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
                     return store?.getState().computed.get(successorId)?.earlyStart ?? null;
                 }, target!.successorId),
-            (earlyStart) =>
-                earlyStart !== null && earlyStart > target!.successorEarlyStartBefore!,
+            (earlyStart) => earlyStart !== null && earlyStart > target!.successorEarlyStartBefore!,
         );
         expect(successorEarlyStartAfter).toBeGreaterThan(target!.successorEarlyStartBefore!);
     });
 
     test("collapsing a phase propagates to the grid and does not oscillate", async ({ page }) => {
-        await page.goto("/");
-        await expect(
-            page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
-        ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+        await gotoSchedule(page);
+        await waitForTreegrid(page);
         await expect(page.locator(".ag-row").first()).toBeVisible({
             timeout: GRID_READY_TIMEOUT_MS,
         });
@@ -307,10 +278,8 @@ test.describe("two-way editing", () => {
     });
 
     test("a cycle-creating edit is rejected and the graph is unchanged", async ({ page }) => {
-        await page.goto("/");
-        await expect(
-            page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
-        ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+        await gotoSchedule(page);
+        await waitForTreegrid(page);
 
         const outcome = await page.evaluate(() => {
             const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;

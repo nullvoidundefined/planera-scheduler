@@ -1,7 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const LOAD_TIMEOUT_MS = 30000;
+import { gotoSchedule, LOAD_TIMEOUT_MS, waitForTreegrid } from "./helpers/appReady";
+
 const SEPARATOR_NAME = "Resize the table and timeline panes";
 
 // DHTMLX (.gantt_container) and AG-Grid (.ag-root-wrapper) each manage their own
@@ -12,19 +13,17 @@ const SEPARATOR_NAME = "Resize the table and timeline panes";
 const VENDOR_WIDGET_SELECTORS = [".ag-root-wrapper", ".gantt_container"];
 
 test("renders the toolbar and both split panes", async ({ page }) => {
-    await page.goto("/");
+    await gotoSchedule(page);
     await expect(page.getByRole("toolbar", { name: "Schedule controls" })).toBeVisible({
         timeout: LOAD_TIMEOUT_MS,
     });
-    await expect(
-        page.getByRole("region", { name: "Schedule table" }).getByRole("treegrid"),
-    ).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+    await waitForTreegrid(page);
     await expect(page.getByTestId("gantt-container")).toBeVisible();
     await expect(page.getByRole("separator", { name: SEPARATOR_NAME })).toBeVisible();
 });
 
 test("the shell has no serious or critical accessibility violations", async ({ page }) => {
-    await page.goto("/");
+    await gotoSchedule(page);
     await expect(page.getByRole("toolbar", { name: "Schedule controls" })).toBeVisible({
         timeout: LOAD_TIMEOUT_MS,
     });

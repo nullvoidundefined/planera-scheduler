@@ -7,8 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 
-const LOAD_TIMEOUT_MS = 30000;
-const GRID_READY_TIMEOUT_MS = 10000;
+import { GRID_READY_TIMEOUT_MS, gotoSchedule, waitForTreegrid } from "./helpers/appReady";
 
 // AG-Grid tree-data: group rows carry class "ag-row-group"; leaf rows do not.
 // The editor input in AG-Grid v33 is rendered inside .ag-cell-editor as an
@@ -19,11 +18,10 @@ const CELL_EDITOR_INPUT_SELECTOR = ".ag-cell-editor .ag-input-field-input, .ag-c
 test("duration cell opens an editable input on double-click (editor module registered)", async ({
     page,
 }) => {
-    await page.goto("/");
+    await gotoSchedule(page);
 
     // Wait for the treegrid to render with data rows.
-    const tableSection = page.getByRole("region", { name: "Schedule table" });
-    await expect(tableSection.getByRole("treegrid")).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+    await waitForTreegrid(page);
     await expect(page.locator(".ag-row").first()).toBeVisible({ timeout: GRID_READY_TIMEOUT_MS });
 
     // Target the first LEAF row's duration cell (group rows are not editable).
@@ -52,10 +50,9 @@ test("typing a new duration value and pressing Enter updates the displayed cell"
 
     const UPDATED_DURATION = "99";
 
-    await page.goto("/");
+    await gotoSchedule(page);
 
-    const tableSection = page.getByRole("region", { name: "Schedule table" });
-    await expect(tableSection.getByRole("treegrid")).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
+    await waitForTreegrid(page);
     await expect(page.locator(".ag-row").first()).toBeVisible({ timeout: GRID_READY_TIMEOUT_MS });
 
     // Capture the first leaf row's row-id so we can locate it stably after the
