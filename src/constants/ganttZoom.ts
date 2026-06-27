@@ -8,6 +8,10 @@ export const GANTT_ZOOM_DAY = "day";
 export const GANTT_ZOOM_MONTH = "month";
 export const GANTT_ZOOM_WEEK = "week";
 
+/** The zoom level applied on initial load. Month shows many months at once,
+ * making the descending staircase and critical chain visible without scrolling. */
+export const GANTT_DEFAULT_ZOOM = GANTT_ZOOM_MONTH;
+
 export interface GanttZoomOption {
     label: string;
     level: string;

@@ -21,7 +21,7 @@ import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
 import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
-import { GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
+import { GANTT_DEFAULT_ZOOM, GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
 import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { useScheduleStore } from "../../state/scheduleStore";
@@ -41,7 +41,7 @@ const WEEK_COLUMN_WIDTH_PX = 80;
 const WEEK_SCALE_FORMAT = "Week #%W";
 
 const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
-    current: GANTT_ZOOM_DAY,
+    current: GANTT_DEFAULT_ZOOM,
     levels: [
         {
             min_column_width: DEFAULT_DAY_WIDTH_PX,
@@ -88,6 +88,7 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
             links: toGanttLinks(graph.dependencies),
             tasks: toGanttTasks(graph, computed, calendar),
         });
+        scrollToProjectStart(computed, calendar);
 
         const detachDrag = attachDragHandler();
         const detachSelection = attachSelectionHandler();
@@ -122,7 +123,22 @@ function configureGantt(): void {
 
 function applyZoomLevels(): void {
     gantt.ext.zoom.init(ZOOM_LEVELS);
-    gantt.ext.zoom.setLevel(GANTT_ZOOM_DAY);
+    gantt.ext.zoom.setLevel(GANTT_DEFAULT_ZOOM);
+}
+
+function scrollToProjectStart(
+    computed: Map<string, ComputedActivity>,
+    calendar: ReturnType<typeof createCalendar>,
+): void {
+    let minEarlyStart = Infinity;
+    for (const activity of computed.values()) {
+        if (activity.earlyStart < minEarlyStart) {
+            minEarlyStart = activity.earlyStart;
+        }
+    }
+    if (isFinite(minEarlyStart)) {
+        gantt.showDate(calendar.dateFromIndex(minEarlyStart));
+    }
 }
 
 function addTodayMarker(): void {

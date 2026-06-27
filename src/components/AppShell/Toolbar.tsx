@@ -10,7 +10,7 @@ import { useState } from "react";
 import type { JSX } from "react";
 
 import { css, cx } from "../../../styled-system/css";
-import { GANTT_ZOOM_DAY, GANTT_ZOOM_OPTIONS } from "../../constants/ganttZoom";
+import { GANTT_DEFAULT_ZOOM, GANTT_ZOOM_OPTIONS } from "../../constants/ganttZoom";
 
 interface LegendItem {
     glyph: string;
@@ -109,7 +109,7 @@ const zoomActiveClass = css({ bg: "inkOnPrimary", borderColor: "transparent", co
 const zoomGroupClass = css({ alignItems: "center", display: "flex", gap: "4px" });
 
 export function Toolbar(): JSX.Element {
-    const [activeZoom, setActiveZoom] = useState(GANTT_ZOOM_DAY);
+    const [activeZoom, setActiveZoom] = useState(GANTT_DEFAULT_ZOOM);
 
     function handleToday(): void {
         if (isGanttReady()) {
