@@ -41,7 +41,6 @@ export default defineConfig({
             },
             tokens: {
                 colors: {
-                    critical: { value: "#C5221C" },
                     float: { value: "#97A1AD" },
                     gold: { value: "#9A6F12" },
                     graphite: { value: "#191D21" },
@@ -78,9 +77,6 @@ export default defineConfig({
                     phase8Border: { value: "#9740C9" },
                     phase8Surface: { value: "#F4ECF9" },
                     slate: { value: "#56606B" },
-                    steel: { value: "#2E5984" },
-                    steelHover: { value: "#24486B" },
-                    steelTint: { value: "#E7EDF3" },
                 },
                 fontSizes: {
                     base: { value: "13px" },
