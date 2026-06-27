@@ -14,7 +14,7 @@ A best-guess clone of **Planera**'s collaborative, CPM-based construction schedu
 built as a **portfolio / hiring artifact** for Planera's *Frontend Software Developer* role.
 
 It must read as production-grade frontend engineering, because the audience is the team that
-builds the real thing. The bar is not "a Gantt chart" — it is "a credible re-creation of the
+builds the real thing. The bar is not "a Gantt chart" - it is "a credible re-creation of the
 hard parts of Planera's product, engineered to the standards of the repository it lives in."
 
 > Implementation conventions (naming, SCSS structure, semantic HTML, TDD workflow, file layout,
@@ -33,11 +33,11 @@ three synchronized, high-performance views**, accurate to the way real schedules
 
 ## 3. Target users (of the product being cloned)
 
-- **Schedulers / planners** — build and maintain the network of activities and dependencies.
-- **Project managers / supers** — read the schedule, track the critical path, drill into phases.
-- **Owners / stakeholders** — consume a clear visual of where the project stands.
+- **Schedulers / planners** - build and maintain the network of activities and dependencies.
+- **Project managers / supers** - read the schedule, track the critical path, drill into phases.
+- **Owners / stakeholders** - consume a clear visual of where the project stands.
 
-## 4. Product concept — one model, three views
+## 4. Product concept - one model, three views
 
 The schedule is a single **directed acyclic graph** (activities = nodes, dependencies = directed
 edges). It is presented through three synchronized surfaces over that one model:
@@ -52,7 +52,7 @@ same model.
 
 ## 5. Feature requirements
 
-### P0 — must have (the core artifact)
+### P0 - must have (the core artifact)
 - **Mock dataset** of several thousand activities, organized **projects → groups (phases) →
   activities**, wired into a valid dependency graph. Served from a mock API.
 - **CPM engine**: forward/backward pass computing early/late dates, total float, and the critical
@@ -67,14 +67,14 @@ same model.
 - **Performance**: smooth at thousands of activities via virtualization on both axes; off-screen
   content is unmounted, not hidden.
 
-### P1 — strong to have
+### P1 - strong to have
 - Drag-to-reschedule with **optimistic update**, downstream-only recompute, CPM recompute moved to
   a **web worker**.
 - Edits modeled as **change-vector operations**, not whole-state writes.
 - Filtering / saved views; custom activity codes (responsibility, location).
 - Schedule **versions / what-if** with side-by-side comparison.
 
-### P2 — aspirational (maps to Planera proper)
+### P2 - aspirational (maps to Planera proper)
 - **Real-time collaboration**: WebSocket transport, server-authoritative operation ordering +
   versioning, presence/awareness, and a **CRDT (Yjs)** for offline (the iPad field case). Conflict
   resolution is two-layered: last-write-wins on the granular atom, plus **semantic validity**
@@ -90,7 +90,7 @@ same model.
   must never be hand-wavy).
 - **Accessibility**: semantic structure; keyboard navigability; ARIA grid semantics where
   virtualization precludes native table elements.
-- **Quality bar**: the codebase must satisfy the repository's root `CLAUDE.md` — conventions, SCSS
+- **Quality bar**: the codebase must satisfy the repository's root `CLAUDE.md` - conventions, SCSS
   architecture, semantic HTML, test-driven workflow. A passing build and green tests are the floor,
   not the goal.
 
@@ -109,4 +109,4 @@ same model.
 ## 9. Stack intent
 React + TypeScript + TanStack Query, mirroring Planera's stack; SCSS per repo conventions; Vitest
 for tests. Gantt/grid may use DHTMLX/AG-Grid in production, or hand-built virtualization to
-demonstrate mastery — a decision recorded in the technical spec, not here.
+demonstrate mastery - a decision recorded in the technical spec, not here.

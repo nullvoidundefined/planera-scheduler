@@ -32,9 +32,11 @@ Every timing edit runs a two-phase recompute:
   critical path across the whole schedule, then merge its delta a beat later. A dispatch token orders
   worker responses so a stale delta cannot overwrite newer state.
 
-Both views are uncontrolled: the table (AG-Grid) and the Gantt (DHTMLX) own their own DOM and
-subscribe to the store, rather than re-rendering from React on every change. The graph is always a
-DAG: an edit that would create a cycle is rejected up front, with no mutation.
+Both views are driven imperatively rather than re-rendered from React on every change. The Gantt
+(DHTMLX) owns its DOM entirely and is updated through a store subscription. The table (AG-Grid)
+rebuilds its row data on each recompute but passes it as immutable data keyed by row id, so AG-Grid
+diffs and patches only the changed rows instead of re-rendering the grid. The graph is always a DAG:
+an edit that would create a cycle is rejected up front, with no mutation.
 
 The critical path is computed by the forward/backward CPM pass (total float of zero marks a critical
 activity) and rendered distinctly in both views.
@@ -59,6 +61,10 @@ npm run e2e      # Playwright E2E suite (boots the dev server automatically)
 npm run smoke    # service-start smoke check
 npm run build    # panda codegen + typecheck + production build
 ```
+
+This is a backend-less demo: the mock schedule (MSW) and the `window.__scheduleStore` test handle are
+gated to the dev server, so `npm run dev` is the way to run it. A production `npm run build` compiles
+cleanly but ships without the mock data source.
 
 In development, the store is exposed as `window.__scheduleStore` so the E2E suite can drive operations
 through the real engine path.

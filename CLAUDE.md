@@ -2,8 +2,8 @@
 
 This project **explicitly follows the root-level Claude configuration** at `~/.claude/CLAUDE.md`
 (the global rules R-001 through R-518, the session-lifecycle and cost rules, and the convention
-files referenced there) and the shared tree conventions at
-`/Users/iangreenough/Desktop/code/personal/.claude/CLAUDE.md`. Those documents govern naming,
+files referenced there) and the shared conventions in the parent workspace's `.claude/CLAUDE.md`.
+Those documents govern naming,
 architecture, testing discipline, commit hygiene, accessibility, and the PR workflow. This file
 adds only project-specific context and records deliberate overrides.
 

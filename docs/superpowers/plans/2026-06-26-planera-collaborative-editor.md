@@ -524,10 +524,10 @@ export const RELATIONSHIP_TYPES = ["FS", "SS", "FF", "SF"] as const;
 ```
 
 - [ ] 2. Copy the remaining constants from the old project unchanged, then adjust the generator file:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/calendar.ts` to `src/constants/calendar.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/calendarDisplay.ts` to `src/constants/calendarDisplay.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/api.ts` to `src/constants/api.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/generator.ts` to `src/constants/generator.ts` (used as-is by the adapted generator in Task 4).
+  - Copy `../gantt-chart/src/constants/calendar.ts` to `src/constants/calendar.ts`.
+  - Copy `../gantt-chart/src/constants/calendarDisplay.ts` to `src/constants/calendarDisplay.ts`.
+  - Copy `../gantt-chart/src/constants/api.ts` to `src/constants/api.ts`.
+  - Copy `../gantt-chart/src/constants/generator.ts` to `src/constants/generator.ts` (used as-is by the adapted generator in Task 4).
 
 - [ ] 3. Create `src/constants/ganttScale.ts` (merges the old `defaultDayWidthPx.ts` and `tickIntervalDays.ts` plus the DHTMLX link-type map; two-or-more constants justify the folder collapse to a single file per R-223):
 
@@ -603,8 +603,8 @@ export function isRelationshipType(value: string): value is RelationshipType {
 ```
 
 - [ ] 5. Copy `src/types/cpm.ts` and `src/types/calendar.ts` from the old project unchanged:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/types/cpm.ts` to `src/types/cpm.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/types/calendar.ts` to `src/types/calendar.ts`.
+  - Copy `../gantt-chart/src/types/cpm.ts` to `src/types/cpm.ts`.
+  - Copy `../gantt-chart/src/types/calendar.ts` to `src/types/calendar.ts`.
 
 - [ ] 6. Write the failing test `src/__tests__/types/operation.test.ts`:
 
@@ -750,22 +750,22 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 **Steps:**
 
 - [ ] 1. Copy the three CPM engine modules from the old project unchanged (they read only `id`, `durationDays`, `predecessorId`, `successorId`, `type`, `lagDays`, which the unified model still provides):
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/computeSchedule.ts` to `src/services/cpm/computeSchedule.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/detectCycle.ts` to `src/services/cpm/detectCycle.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/sortActivitiesTopologically.ts` to `src/services/cpm/sortActivitiesTopologically.ts`.
+  - Copy `../gantt-chart/src/services/cpm/computeSchedule.ts` to `src/services/cpm/computeSchedule.ts`.
+  - Copy `../gantt-chart/src/services/cpm/detectCycle.ts` to `src/services/cpm/detectCycle.ts`.
+  - Copy `../gantt-chart/src/services/cpm/sortActivitiesTopologically.ts` to `src/services/cpm/sortActivitiesTopologically.ts`.
 
 - [ ] 2. Copy the calendar and formatter services unchanged:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/createCalendar.ts` to `src/services/createCalendar.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/formatScheduleDate.ts` to `src/services/formatScheduleDate.ts`.
+  - Copy `../gantt-chart/src/services/createCalendar.ts` to `src/services/createCalendar.ts`.
+  - Copy `../gantt-chart/src/services/formatScheduleDate.ts` to `src/services/formatScheduleDate.ts`.
 
 - [ ] 3. Copy the calendar and formatter tests unchanged, then copy the three CPM engine tests:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/createCalendar.test.ts` to `src/__tests__/services/createCalendar.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/formatScheduleDate.test.ts` to `src/__tests__/services/formatScheduleDate.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/computeSchedule.test.ts` to `src/__tests__/services/cpm/computeSchedule.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/detectCycle.test.ts` to `src/__tests__/services/cpm/detectCycle.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/sortActivitiesTopologically.test.ts` to `src/__tests__/services/cpm/sortActivitiesTopologically.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/createCalendar.test.ts` to `src/__tests__/services/createCalendar.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/formatScheduleDate.test.ts` to `src/__tests__/services/formatScheduleDate.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/computeSchedule.test.ts` to `src/__tests__/services/cpm/computeSchedule.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/detectCycle.test.ts` to `src/__tests__/services/cpm/detectCycle.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/sortActivitiesTopologically.test.ts` to `src/__tests__/services/cpm/sortActivitiesTopologically.test.ts`.
 
-- [ ] 4. Create the adapted fixture `src/__fixtures__/cpmNetworks.ts`. Port from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__fixtures__/cpmNetworks.ts` but change `makeActivity` to emit unified leaf nodes, add edge ids, and drop the Project/Group scaffolding and `makeGraph`'s `projects`/`groups`. Replace the helpers and graph factory with:
+- [ ] 4. Create the adapted fixture `src/__fixtures__/cpmNetworks.ts`. Port from `../gantt-chart/src/__fixtures__/cpmNetworks.ts` but change `makeActivity` to emit unified leaf nodes, add edge ids, and drop the Project/Group scaffolding and `makeGraph`'s `projects`/`groups`. Replace the helpers and graph factory with:
 
 ```ts
 /**
@@ -1170,7 +1170,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Steps:**
 
-- [ ] 1. Write the adapted failing test `src/__tests__/services/generateSchedule.test.ts`. Port the invariant tests from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/generateSchedule.test.ts`, replacing `groupId`/`groups`/`projects` assertions with the unified model:
+- [ ] 1. Write the adapted failing test `src/__tests__/services/generateSchedule.test.ts`. Port the invariant tests from `../gantt-chart/src/__tests__/services/generateSchedule.test.ts`, replacing `groupId`/`groups`/`projects` assertions with the unified model:
 
 ```ts
 import { describe, expect, test } from "vitest";
@@ -1324,7 +1324,7 @@ npx vitest run src/__tests__/services/generateSchedule.test.ts
 ```
 Expected: fails to resolve `../../services/generateSchedule`.
 
-- [ ] 3. Create `src/services/generateSchedule.ts` by adapting `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/generateSchedule.ts`. Keep `buildPrng`, `selectPredecessorIndices`, `selectPrimaryPredecessorIndex`, `selectMergePredecessorIndex`, `buildWbs`, and the id-builder helpers unchanged. Replace the node-building so projects and phases become group activities, leaves carry `type`/`parentId`, edges carry an `id`, and the return is `{ activities, dependencies }`:
+- [ ] 3. Create `src/services/generateSchedule.ts` by adapting `../gantt-chart/src/services/generateSchedule.ts`. Keep `buildPrng`, `selectPredecessorIndices`, `selectPrimaryPredecessorIndex`, `selectMergePredecessorIndex`, `buildWbs`, and the id-builder helpers unchanged. Replace the node-building so projects and phases become group activities, leaves carry `type`/`parentId`, edges carry an `id`, and the return is `{ activities, dependencies }`:
 
 ```ts
 /**
@@ -2717,7 +2717,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Steps:**
 
-- [ ] 1. Copy and adapt `src/api/fetchScheduleGraph.ts` from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/api/fetchScheduleGraph.ts`. The body is unchanged; the return type is already `Promise<ScheduleGraph>` which now resolves to the two-array shape. Keep it verbatim.
+- [ ] 1. Copy and adapt `src/api/fetchScheduleGraph.ts` from `../gantt-chart/src/api/fetchScheduleGraph.ts`. The body is unchanged; the return type is already `Promise<ScheduleGraph>` which now resolves to the two-array shape. Keep it verbatim.
 
 - [ ] 2. Replace `src/mocks/handlers.ts` with the schedule-graph handler (adapted: single unified graph, no projects route):
 
