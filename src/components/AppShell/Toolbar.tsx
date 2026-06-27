@@ -44,7 +44,7 @@ const headingClass = css({
 const headerClass = css({
     alignItems: "center",
     bg: "primary",
-    boxShadow: "inset 0 -1px 0 0 rgba(0, 0, 0, 0.18)",
+    boxShadow: "inset 0 -1px 0 0 token(colors.scrimOnPrimary)",
     display: "flex",
     gap: "16px",
     height: "toolbar",
@@ -54,9 +54,9 @@ const headerClass = css({
 
 const controlButtonClass = css({
     _focusVisible: { outline: "2px solid token(colors.inkOnPrimary)", outlineOffset: "2px" },
-    _hover: { bg: "rgba(255, 255, 255, 0.12)" },
+    _hover: { bg: "controlHover" },
     bg: "transparent",
-    border: "1px solid rgba(255, 255, 255, 0.45)",
+    border: "1px solid token(colors.controlBorder)",
     borderRadius: "4px",
     color: "inkOnPrimary",
     cursor: "pointer",
@@ -88,7 +88,7 @@ const legendItemClass = css({
 });
 
 const legendSwatchClass = css({
-    fontSize: "11px",
+    fontSize: "caption",
     lineHeight: "1",
 });
 
@@ -98,7 +98,7 @@ const markClass = css({
     borderRadius: "3px",
     color: "primary",
     display: "flex",
-    fontSize: "12px",
+    fontSize: "small",
     height: "22px",
     justifyContent: "center",
     width: "22px",

@@ -23,7 +23,7 @@ test("renders the toolbar and both split panes", async ({ page }) => {
     await expect(page.getByRole("separator", { name: SEPARATOR_NAME })).toBeVisible();
 });
 
-test("the shell has no critical accessibility violations", async ({ page }) => {
+test("the shell has no serious or critical accessibility violations", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("toolbar", { name: "Schedule controls" })).toBeVisible({
         timeout: LOAD_TIMEOUT_MS,
@@ -33,6 +33,8 @@ test("the shell has no critical accessibility violations", async ({ page }) => {
         builder = builder.exclude(selector);
     }
     const results = await builder.analyze();
-    const critical = results.violations.filter((violation) => violation.impact === "critical");
-    expect(critical).toEqual([]);
+    const seriousOrCritical = results.violations.filter(
+        (violation) => violation.impact === "serious" || violation.impact === "critical",
+    );
+    expect(seriousOrCritical).toEqual([]);
 });
