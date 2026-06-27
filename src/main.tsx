@@ -1,4 +1,9 @@
-/** Application entry point: mounts AppShell and, in development, starts the MSW worker. */
+/**
+ * Application entry point: starts the MSW worker that serves the generated schedule and mounts
+ * AppShell. This is a backend-less demo, so MSW runs in production too (the service worker
+ * intercepts the schedule fetch). The store handle is exposed on window only in development, for
+ * the E2E suite.
+ */
 import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/500.css";
 import "@fontsource/ibm-plex-sans/600.css";
@@ -13,10 +18,10 @@ import { AppShell } from "./components/AppShell/AppShell";
 import "./index.css";
 
 async function startApp(): Promise<void> {
-    if (import.meta.env.DEV) {
-        const { worker } = await import("./mocks/browser");
-        await worker.start({ onUnhandledRequest: "bypass" });
+    const { worker } = await import("./mocks/browser");
+    await worker.start({ onUnhandledRequest: "bypass", quiet: import.meta.env.PROD });
 
+    if (import.meta.env.DEV) {
         const { useScheduleStore } = await import("./state/scheduleStore");
         (window as unknown as { __scheduleStore: typeof useScheduleStore }).__scheduleStore =
             useScheduleStore;

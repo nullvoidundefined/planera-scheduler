@@ -59,15 +59,20 @@ npm run dev      # Vite dev server on http://localhost:3000 (MSW serves the mock
 npm run test     # Vitest unit and component suite
 npm run e2e      # Playwright E2E suite (boots the dev server automatically)
 npm run smoke    # service-start smoke check
-npm run build    # panda codegen + typecheck + production build
+npm run build    # panda codegen + typecheck + production build (outputs to dist/)
+npm run start    # serve the production build (uses $PORT; serves dist/ as an SPA)
 ```
 
-This is a backend-less demo: the mock schedule (MSW) and the `window.__scheduleStore` test handle are
-gated to the dev server, so `npm run dev` is the way to run it. A production `npm run build` compiles
-cleanly but ships without the mock data source.
+This is a backend-less demo: the seeded schedule is served by Mock Service Worker (MSW), which runs
+in both development and production (the service worker intercepts the schedule fetch), so the static
+production build is fully self-contained with no backend. The `window.__scheduleStore` test handle is
+gated to development only.
 
-In development, the store is exposed as `window.__scheduleStore` so the E2E suite can drive operations
-through the real engine path.
+## Deployment
+
+The production build is a static SPA. It deploys to Railway via Nixpacks (`railway.json`): the build
+step runs `npm run build` and the start command runs `npm run start`, which serves `dist/` on Railway's
+injected `$PORT` with SPA fallback and a healthcheck at `/`. Set `NODE_ENV=production` on the service.
 
 ## Note on the AG-Grid Enterprise evaluation watermark
 
