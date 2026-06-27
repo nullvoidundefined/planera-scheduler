@@ -20,7 +20,7 @@ export function getScheduleTable(page: Page) {
 }
 
 export async function gotoSchedule(page: Page): Promise<void> {
-    await page.goto("/");
+    await page.goto("/demo");
 }
 
 export async function waitForFirstGanttBar(

@@ -31,6 +31,7 @@
         "dhtmlx-gantt": "^9.0.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "react-router-dom": "^7.18.0",
         "serve": "^14.2.6",
         "zustand": "^5.0.14"
     },
