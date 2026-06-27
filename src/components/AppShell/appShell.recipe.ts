@@ -4,7 +4,7 @@
  * absolutely-positioned view layers (the integrated Gantt and the standalone table)
  * that occupy the same area. Only the active layer is visible; the inactive one stays
  * mounted and full-size via visibility:hidden so the expensive DHTMLX widget is never
- * re-initialized on a toggle. Visual values resolve to the drafting-table tokens.
+ * re-initialized on a toggle. Visual values resolve to the friendly-pastel tokens.
  */
 import { cva } from "../../../styled-system/css";
 
@@ -27,6 +27,9 @@ export const viewStackRecipe = cva({
         bg: "canvas",
         minHeight: "0",
         overflow: "hidden",
+        // Warm-canvas gutter around the panels: the absolute layers inset to this
+        // padding box, so their rounding and shadow read against the canvas.
+        padding: "12px",
         position: "relative",
     },
 });
@@ -34,6 +37,8 @@ export const viewStackRecipe = cva({
 export const viewLayerRecipe = cva({
     base: {
         bg: "surface",
+        borderRadius: "lg",
+        boxShadow: "md",
         inset: "0",
         minHeight: "0",
         minWidth: "0",

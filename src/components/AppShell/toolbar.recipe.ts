@@ -1,9 +1,9 @@
 /**
- * Shared PandaCSS recipes for the toolbar's interactive controls: the steel pill
+ * Shared PandaCSS recipes for the toolbar's interactive controls: the indigo pill
  * button (with an active/pressed variant) and the tight horizontal button group.
  * Both the Gantt/Table sub-nav in Toolbar and the zoom controls in GanttControls
  * consume these so the two control clusters stay visually identical. Values resolve
- * to the drafting-table tokens.
+ * to the friendly-pastel tokens.
  */
 import { cva } from "../../../styled-system/css";
 
@@ -13,7 +13,7 @@ export const controlButtonRecipe = cva({
         _hover: { bg: "controlHover" },
         bg: "transparent",
         border: "1px solid token(colors.controlBorder)",
-        borderRadius: "4px",
+        borderRadius: "pill",
         color: "inkOnPrimary",
         cursor: "pointer",
         fontFamily: "sans",
