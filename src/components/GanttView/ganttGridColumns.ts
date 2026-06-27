@@ -12,7 +12,7 @@ import type { GridColumn, Task } from "dhtmlx-gantt";
 
 import { formatDateLabel } from "../../services/formatDateLabel";
 
-const CRITICAL_TAG_HTML = '<span class="gantt-critical-tag">CP</span>';
+const CRITICAL_TAG_HTML = '<span class="gantt-critical-tag">★ CP</span>';
 const DURATION_COLUMN_WIDTH_PX = 96;
 const EMPTY_CELL = "";
 const FINISH_COLUMN_WIDTH_PX = 104;
@@ -24,8 +24,23 @@ const START_COLUMN_WIDTH_PX = 104;
 const WBS_COLUMN_WIDTH_PX = 96;
 
 export const GANTT_GRID_COLUMNS: GridColumn[] = [
-    { align: "left", label: "WBS", name: "wbs", resize: true, template: renderWbs, width: WBS_COLUMN_WIDTH_PX },
-    { align: "left", label: "Name", min_width: NAME_COLUMN_MIN_WIDTH_PX, name: "text", resize: true, tree: true, width: NAME_COLUMN_WIDTH },
+    {
+        align: "left",
+        label: "WBS",
+        name: "wbs",
+        resize: true,
+        template: renderWbs,
+        width: WBS_COLUMN_WIDTH_PX,
+    },
+    {
+        align: "left",
+        label: "Name",
+        min_width: NAME_COLUMN_MIN_WIDTH_PX,
+        name: "text",
+        resize: true,
+        tree: true,
+        width: NAME_COLUMN_WIDTH,
+    },
     {
         align: "right",
         label: "Duration (d)",

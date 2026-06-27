@@ -1,12 +1,14 @@
 @layer reset, base, tokens, recipes, utilities;
 
 /*
- * Third-party widget theme overrides for the "drafting table" system. These rules
+ * Third-party widget theme overrides for the friendly-pastel system. These rules
  * sit outside the Panda layers (and load after the DHTMLX stylesheet) so they win
  * the cascade, and they reference only Panda-emitted token CSS variables so no hex
- * literal lives outside panda.config.ts. They retheme the DHTMLX Gantt grid, bars,
- * critical chain, milestones, and today marker, and draw the AG-Grid critical-row
- * left tick, so the critical path reads as one continuous red chain across views.
+ * literal lives outside panda.config.ts. They retheme the DHTMLX Gantt grid, paint
+ * each schedule phase its own pastel bar and row tint across both views, round the
+ * bars, and draw the gold critical signature: a star beside each critical bar, a
+ * gold dependency thread, and a gold left tick in the table. Critical bars keep
+ * their phase color so the path reads through the star and thread, never by hue.
  */
 
 html,
@@ -46,10 +48,10 @@ body,
     font-family: var(--fonts-sans);
 }
 
-/* Non-color critical cue in the grid: the "CP" tag in critical red, so the
+/* Non-color critical cue in the grid: the star + "CP" tag in gold, so the
  * signature never relies on hue alone (accessibility). */
 .gantt-critical-tag {
-    color: var(--colors-critical);
+    color: var(--colors-gold);
     font-family: var(--fonts-sans);
     font-weight: 600;
 }
@@ -91,46 +93,131 @@ body,
     border-color: var(--colors-grid);
 }
 
-/* DHTMLX: non-critical bars in float, the critical chain in critical. */
+/* DHTMLX: rounded bars, float as the neutral fallback for phaseless (project)
+ * rollups. Phase bars override the fill per their hue below. */
 .gantt_task_line {
     background-color: var(--colors-float);
     border-color: var(--colors-float);
+    border-radius: var(--radii-sm);
 }
 
 .gantt_task_line .gantt_task_progress {
     background-color: var(--colors-progress-overlay);
 }
 
-.gantt_task_line.critical {
-    background-color: var(--colors-critical);
-    border-color: var(--colors-critical);
-}
-
-.gantt_task_line.critical .gantt_task_progress {
-    background-color: var(--colors-progress-overlay-critical);
-}
-
-/* Non-critical (float) bars: graphite on float is ~6:1, AA-passing. */
+/* Dark ink on every pastel bar (the bar tone is ~80% L, ink contrast >= 8.7:1). */
 .gantt_task_line .gantt_task_content {
     color: var(--colors-ink);
     font-family: var(--fonts-mono);
 }
 
-/* Critical bars: white on critical-red is ~5.5:1, AA-passing. */
-.gantt_task_line.critical .gantt_task_content {
-    color: var(--colors-panel);
+/* Phase leaf bars: the saturated "bar" tone with the matching border. */
+.gantt_task_line.phase-0 {
+    background-color: var(--colors-phase1-bar);
+    border-color: var(--colors-phase1-border);
 }
 
-/* DHTMLX: critical dependency links render in critical, completing the chain. */
+.gantt_task_line.phase-1 {
+    background-color: var(--colors-phase2-bar);
+    border-color: var(--colors-phase2-border);
+}
+
+.gantt_task_line.phase-2 {
+    background-color: var(--colors-phase3-bar);
+    border-color: var(--colors-phase3-border);
+}
+
+.gantt_task_line.phase-3 {
+    background-color: var(--colors-phase4-bar);
+    border-color: var(--colors-phase4-border);
+}
+
+.gantt_task_line.phase-4 {
+    background-color: var(--colors-phase5-bar);
+    border-color: var(--colors-phase5-border);
+}
+
+.gantt_task_line.phase-5 {
+    background-color: var(--colors-phase6-bar);
+    border-color: var(--colors-phase6-border);
+}
+
+.gantt_task_line.phase-6 {
+    background-color: var(--colors-phase7-bar);
+    border-color: var(--colors-phase7-border);
+}
+
+.gantt_task_line.phase-7 {
+    background-color: var(--colors-phase8-bar);
+    border-color: var(--colors-phase8-border);
+}
+
+/* Phase rollup bars: the paler "surface" tone so a phase span reads quieter than
+ * its leaves while keeping the same hue and border. */
+.gantt_task_line.phase-summary-0 {
+    background-color: var(--colors-phase1-surface);
+    border-color: var(--colors-phase1-border);
+}
+
+.gantt_task_line.phase-summary-1 {
+    background-color: var(--colors-phase2-surface);
+    border-color: var(--colors-phase2-border);
+}
+
+.gantt_task_line.phase-summary-2 {
+    background-color: var(--colors-phase3-surface);
+    border-color: var(--colors-phase3-border);
+}
+
+.gantt_task_line.phase-summary-3 {
+    background-color: var(--colors-phase4-surface);
+    border-color: var(--colors-phase4-border);
+}
+
+.gantt_task_line.phase-summary-4 {
+    background-color: var(--colors-phase5-surface);
+    border-color: var(--colors-phase5-border);
+}
+
+.gantt_task_line.phase-summary-5 {
+    background-color: var(--colors-phase6-surface);
+    border-color: var(--colors-phase6-border);
+}
+
+.gantt_task_line.phase-summary-6 {
+    background-color: var(--colors-phase7-surface);
+    border-color: var(--colors-phase7-border);
+}
+
+.gantt_task_line.phase-summary-7 {
+    background-color: var(--colors-phase8-surface);
+    border-color: var(--colors-phase8-border);
+}
+
+/* The gold critical star, rendered left of each critical leaf bar by the
+ * leftside_text template. The dark outline holds it >= 3:1 on any pastel. */
+.gantt_task_line .cp-star,
+.cp-star {
+    color: var(--colors-gold);
+    font-size: var(--font-sizes-base);
+    text-shadow:
+        0 0 1px var(--colors-graphite),
+        0 0 2px var(--colors-graphite);
+}
+
+/* DHTMLX: critical dependency links render as the gold thread; the halo fattens
+ * the 2 px line toward a 3 px read without distorting the segment geometry. */
 .gantt_task_link.critical-link .gantt_line_wrapper > div {
-    background-color: var(--colors-critical);
+    background-color: var(--colors-gold);
+    box-shadow: 0 0 0 0.5px var(--colors-gold);
 }
 
 .gantt_task_link.critical-link .gantt_link_arrow {
-    border-color: var(--colors-critical);
+    border-color: var(--colors-gold);
 }
 
-/* DHTMLX: milestones are graphite diamonds (after critical so the diamond holds). */
+/* DHTMLX: milestones are graphite diamonds (after the phase fills so the diamond
+ * holds its shape and color). */
 .gantt_task_line.gantt_milestone {
     background-color: var(--colors-graphite);
     border-color: var(--colors-graphite);
@@ -146,9 +233,53 @@ body,
     font-family: var(--fonts-mono);
 }
 
-/* AG-Grid: the critical-row left tick, the table half of the red chain. */
+/* AG-Grid: phase group rows take the pale "surface" tint plus a left stripe in the
+ * phase border. Leaf rows carry no phase class, so they stay white. */
+.ag-row.phase-0 {
+    background-color: var(--colors-phase1-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase1-border);
+}
+
+.ag-row.phase-1 {
+    background-color: var(--colors-phase2-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase2-border);
+}
+
+.ag-row.phase-2 {
+    background-color: var(--colors-phase3-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase3-border);
+}
+
+.ag-row.phase-3 {
+    background-color: var(--colors-phase4-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase4-border);
+}
+
+.ag-row.phase-4 {
+    background-color: var(--colors-phase5-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase5-border);
+}
+
+.ag-row.phase-5 {
+    background-color: var(--colors-phase6-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase6-border);
+}
+
+.ag-row.phase-6 {
+    background-color: var(--colors-phase7-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase7-border);
+}
+
+.ag-row.phase-7 {
+    background-color: var(--colors-phase8-surface);
+    box-shadow: inset 3px 0 0 0 var(--colors-phase8-border);
+}
+
+/* AG-Grid: the critical-row left tick in gold, the table half of the critical
+ * signature. Placed after the phase rows so a critical phase row shows the gold
+ * tick rather than its phase stripe. */
 .ag-row.ag-row-critical {
-    box-shadow: inset 3px 0 0 0 var(--colors-critical);
+    box-shadow: inset 3px 0 0 0 var(--colors-gold);
 }
 
 @media (prefers-reduced-motion: reduce) {

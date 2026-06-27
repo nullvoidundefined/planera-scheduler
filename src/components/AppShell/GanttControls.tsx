@@ -1,7 +1,7 @@
 /**
  * Gantt-only toolbar controls: the Day/Week/Month zoom group wired to the live
  * DHTMLX zoom extension, a Today button that scrolls the timeline to the today
- * marker, and the critical-path legend that teaches the red chain with text labels,
+ * marker, and the critical-path legend that teaches the gold chain with text labels,
  * never color alone. Rendered by Toolbar only while the Gantt surface is active,
  * since every control here acts on the DHTMLX widget.
  */
@@ -20,12 +20,12 @@ interface LegendItem {
     swatchClass: string;
 }
 
-const criticalSwatchClass = css({ color: "critical" });
+const criticalSwatchClass = css({ color: "gold" });
 const floatSwatchClass = css({ color: "float" });
 const milestoneSwatchClass = css({ color: "graphite" });
 
 const LEGEND_ITEMS: LegendItem[] = [
-    { glyph: "▬", label: "Critical", swatchClass: criticalSwatchClass },
+    { glyph: "★", label: "Critical", swatchClass: criticalSwatchClass },
     { glyph: "▬", label: "Float", swatchClass: floatSwatchClass },
     { glyph: "◆", label: "Milestone", swatchClass: milestoneSwatchClass },
 ];
@@ -86,13 +86,20 @@ export function GanttControls(): JSX.Element {
                     </button>
                 ))}
             </div>
-            <button className={controlButtonRecipe({ active: false })} onClick={handleToday} type="button">
+            <button
+                className={controlButtonRecipe({ active: false })}
+                onClick={handleToday}
+                type="button"
+            >
                 Today
             </button>
             <ul aria-label="Critical path legend" className={legendClass}>
                 {LEGEND_ITEMS.map((item) => (
                     <li className={legendItemClass} key={item.label}>
-                        <span aria-hidden="true" className={cx(legendSwatchClass, item.swatchClass)}>
+                        <span
+                            aria-hidden="true"
+                            className={cx(legendSwatchClass, item.swatchClass)}
+                        >
                             {item.glyph}
                         </span>
                         <span>{item.label}</span>
