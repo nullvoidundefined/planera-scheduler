@@ -20,10 +20,16 @@ import type { RefObject } from "react";
 
 import { DEFAULT_WORK_WEEK } from "../../constants/calendar";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
-import { GANTT_DEFAULT_ZOOM, GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
+import {
+    GANTT_DEFAULT_ZOOM,
+    GANTT_ZOOM_DAY,
+    GANTT_ZOOM_MONTH,
+    GANTT_ZOOM_WEEK,
+} from "../../constants/ganttZoom";
 import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { computeSummaries } from "../../services/cpm/computeSummaries";
 import { createCalendar } from "../../services/createCalendar";
+import { getPhaseColorIndex } from "../../services/getPhaseColorIndex";
 import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
@@ -32,9 +38,11 @@ import { attachGridResizer } from "./attachGridResizer";
 import { GANTT_GRID_COLUMNS } from "./ganttGridColumns";
 import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
 import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
+import { resolveGroupColorClass } from "./resolveGroupColorClass";
 import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 
+const CP_STAR_HTML = '<span class="cp-star">★</span>';
 const DAY_SCALE_HEIGHT_PX = 27;
 const DAYS_PER_WEEK = 7;
 const GANTT_BAR_HEIGHT_PX = 18;
@@ -105,6 +113,11 @@ const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
 // dispatches only when this flag is clear (a genuine user chevron click).
 let suppressCollapseEcho = false;
 
+// The phase -> color index map for the loaded schedule, derived once from the full
+// activity list at init and read by the task_class template to paint each bar its
+// phase tone. The activity list is stable for the session, so the map never changes.
+let ganttPhaseColorIndex: Map<string, number> = new Map();
+
 export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): void {
     useEffect(() => {
         const container = containerRef.current;
@@ -120,6 +133,7 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
         addTodayMarker();
 
         const { collapsed, computed, graph } = useScheduleStore.getState();
+        ganttPhaseColorIndex = getPhaseColorIndex(graph.activities);
         gantt.parse({
             links: toGanttLinks(graph.dependencies),
             tasks: toGanttTasks(graph, computed, calendar),
@@ -167,8 +181,20 @@ function configureGantt(): void {
     // smart_rendering, which is left on.
     gantt.config.smart_scales = false;
     applyWorkTime();
-    gantt.templates.task_class = (_start, _end, task) =>
-        resolveCriticalTaskClass(useScheduleStore.getState().computed.get(String(task.id)));
+    gantt.templates.task_class = (_start, _end, task) => {
+        const computed = useScheduleStore.getState().computed.get(String(task.id));
+        const phaseClass = resolveGroupColorClass(
+            { id: String(task.id), parent: String(task.parent) },
+            ganttPhaseColorIndex,
+        );
+        return [phaseClass, resolveCriticalTaskClass(computed)].filter(Boolean).join(" ");
+    };
+    // A gold star to the left of every critical leaf bar: a non-color critical cue
+    // that survives the pastel bars (the .cp-star outline holds it >= 3:1 on any hue).
+    gantt.templates.leftside_text = (_start, _end, task) =>
+        useScheduleStore.getState().computed.get(String(task.id))?.isCritical === true
+            ? CP_STAR_HTML
+            : "";
     gantt.templates.link_class = (link) => {
         const { computed } = useScheduleStore.getState();
         return resolveCriticalLinkClass(
@@ -252,10 +278,12 @@ function attachCollapseHandlers(): () => void {
 
 function handleCollapseToggle(taskId: string | number): boolean {
     if (!suppressCollapseEcho) {
-        useScheduleStore.getState().dispatchOperation(
-            { kind: "toggleCollapse", rowId: String(taskId) },
-            OPERATION_ORIGIN_GANTT,
-        );
+        useScheduleStore
+            .getState()
+            .dispatchOperation(
+                { kind: "toggleCollapse", rowId: String(taskId) },
+                OPERATION_ORIGIN_GANTT,
+            );
     }
     return true;
 }

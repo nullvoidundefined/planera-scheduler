@@ -13,7 +13,7 @@ const LEAF_CLASS_PREFIX = "phase-";
 const SUMMARY_CLASS_PREFIX = "phase-summary-";
 
 export function resolveGroupColorClass(
-    task: GanttTask,
+    task: Pick<GanttTask, "id" | "parent">,
     phaseColorIndex: Map<string, number>,
 ): string {
     const summaryIndex = phaseColorIndex.get(task.id);
