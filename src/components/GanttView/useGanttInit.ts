@@ -152,6 +152,16 @@ function configureGantt(): void {
     gantt.config.layout = GANTT_LAYOUT;
     gantt.config.grid_width = GANTT_GRID_WIDTH_PX;
     gantt.config.keep_grid_width = true;
+    // Render the full date-header scale once instead of only its visible slice.
+    // With smart_scales on (the default), DHTMLX tears down and rebuilds the scale
+    // cells for each new visible window on every scroll event; a scroll that lands
+    // mid-rebuild flashes a partially populated header, so the month and week rows
+    // appear to collapse and misalign during fast horizontal scrolling. Rendering
+    // the whole scale up front (a few hundred cells at the default Month zoom) keeps
+    // it static in the DOM, so horizontal scroll only translates it and the rows
+    // stay pixel-aligned with the bars. The data-area bars still virtualize through
+    // smart_rendering, which is left on.
+    gantt.config.smart_scales = false;
     applyWorkTime();
     gantt.templates.task_class = (_start, _end, task) =>
         resolveCriticalTaskClass(useScheduleStore.getState().computed.get(String(task.id)));
