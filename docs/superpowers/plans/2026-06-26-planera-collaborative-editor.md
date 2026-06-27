@@ -524,10 +524,10 @@ export const RELATIONSHIP_TYPES = ["FS", "SS", "FF", "SF"] as const;
 ```
 
 - [ ] 2. Copy the remaining constants from the old project unchanged, then adjust the generator file:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/calendar.ts` to `src/constants/calendar.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/calendarDisplay.ts` to `src/constants/calendarDisplay.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/api.ts` to `src/constants/api.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/constants/generator.ts` to `src/constants/generator.ts` (used as-is by the adapted generator in Task 4).
+  - Copy `../gantt-chart/src/constants/calendar.ts` to `src/constants/calendar.ts`.
+  - Copy `../gantt-chart/src/constants/calendarDisplay.ts` to `src/constants/calendarDisplay.ts`.
+  - Copy `../gantt-chart/src/constants/api.ts` to `src/constants/api.ts`.
+  - Copy `../gantt-chart/src/constants/generator.ts` to `src/constants/generator.ts` (used as-is by the adapted generator in Task 4).
 
 - [ ] 3. Create `src/constants/ganttScale.ts` (merges the old `defaultDayWidthPx.ts` and `tickIntervalDays.ts` plus the DHTMLX link-type map; two-or-more constants justify the folder collapse to a single file per R-223):
 
@@ -603,8 +603,8 @@ export function isRelationshipType(value: string): value is RelationshipType {
 ```
 
 - [ ] 5. Copy `src/types/cpm.ts` and `src/types/calendar.ts` from the old project unchanged:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/types/cpm.ts` to `src/types/cpm.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/types/calendar.ts` to `src/types/calendar.ts`.
+  - Copy `../gantt-chart/src/types/cpm.ts` to `src/types/cpm.ts`.
+  - Copy `../gantt-chart/src/types/calendar.ts` to `src/types/calendar.ts`.
 
 - [ ] 6. Write the failing test `src/__tests__/types/operation.test.ts`:
 
@@ -750,22 +750,22 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 **Steps:**
 
 - [ ] 1. Copy the three CPM engine modules from the old project unchanged (they read only `id`, `durationDays`, `predecessorId`, `successorId`, `type`, `lagDays`, which the unified model still provides):
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/computeSchedule.ts` to `src/services/cpm/computeSchedule.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/detectCycle.ts` to `src/services/cpm/detectCycle.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/cpm/sortActivitiesTopologically.ts` to `src/services/cpm/sortActivitiesTopologically.ts`.
+  - Copy `../gantt-chart/src/services/cpm/computeSchedule.ts` to `src/services/cpm/computeSchedule.ts`.
+  - Copy `../gantt-chart/src/services/cpm/detectCycle.ts` to `src/services/cpm/detectCycle.ts`.
+  - Copy `../gantt-chart/src/services/cpm/sortActivitiesTopologically.ts` to `src/services/cpm/sortActivitiesTopologically.ts`.
 
 - [ ] 2. Copy the calendar and formatter services unchanged:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/createCalendar.ts` to `src/services/createCalendar.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/formatScheduleDate.ts` to `src/services/formatScheduleDate.ts`.
+  - Copy `../gantt-chart/src/services/createCalendar.ts` to `src/services/createCalendar.ts`.
+  - Copy `../gantt-chart/src/services/formatScheduleDate.ts` to `src/services/formatScheduleDate.ts`.
 
 - [ ] 3. Copy the calendar and formatter tests unchanged, then copy the three CPM engine tests:
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/createCalendar.test.ts` to `src/__tests__/services/createCalendar.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/formatScheduleDate.test.ts` to `src/__tests__/services/formatScheduleDate.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/computeSchedule.test.ts` to `src/__tests__/services/cpm/computeSchedule.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/detectCycle.test.ts` to `src/__tests__/services/cpm/detectCycle.test.ts`.
-  - Copy `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/cpm/sortActivitiesTopologically.test.ts` to `src/__tests__/services/cpm/sortActivitiesTopologically.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/createCalendar.test.ts` to `src/__tests__/services/createCalendar.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/formatScheduleDate.test.ts` to `src/__tests__/services/formatScheduleDate.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/computeSchedule.test.ts` to `src/__tests__/services/cpm/computeSchedule.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/detectCycle.test.ts` to `src/__tests__/services/cpm/detectCycle.test.ts`.
+  - Copy `../gantt-chart/src/__tests__/services/cpm/sortActivitiesTopologically.test.ts` to `src/__tests__/services/cpm/sortActivitiesTopologically.test.ts`.
 
-- [ ] 4. Create the adapted fixture `src/__fixtures__/cpmNetworks.ts`. Port from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__fixtures__/cpmNetworks.ts` but change `makeActivity` to emit unified leaf nodes, add edge ids, and drop the Project/Group scaffolding and `makeGraph`'s `projects`/`groups`. Replace the helpers and graph factory with:
+- [ ] 4. Create the adapted fixture `src/__fixtures__/cpmNetworks.ts`. Port from `../gantt-chart/src/__fixtures__/cpmNetworks.ts` but change `makeActivity` to emit unified leaf nodes, add edge ids, and drop the Project/Group scaffolding and `makeGraph`'s `projects`/`groups`. Replace the helpers and graph factory with:
 
 ```ts
 /**
@@ -1170,7 +1170,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Steps:**
 
-- [ ] 1. Write the adapted failing test `src/__tests__/services/generateSchedule.test.ts`. Port the invariant tests from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/__tests__/services/generateSchedule.test.ts`, replacing `groupId`/`groups`/`projects` assertions with the unified model:
+- [ ] 1. Write the adapted failing test `src/__tests__/services/generateSchedule.test.ts`. Port the invariant tests from `../gantt-chart/src/__tests__/services/generateSchedule.test.ts`, replacing `groupId`/`groups`/`projects` assertions with the unified model:
 
 ```ts
 import { describe, expect, test } from "vitest";
@@ -1324,7 +1324,7 @@ npx vitest run src/__tests__/services/generateSchedule.test.ts
 ```
 Expected: fails to resolve `../../services/generateSchedule`.
 
-- [ ] 3. Create `src/services/generateSchedule.ts` by adapting `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/services/generateSchedule.ts`. Keep `buildPrng`, `selectPredecessorIndices`, `selectPrimaryPredecessorIndex`, `selectMergePredecessorIndex`, `buildWbs`, and the id-builder helpers unchanged. Replace the node-building so projects and phases become group activities, leaves carry `type`/`parentId`, edges carry an `id`, and the return is `{ activities, dependencies }`:
+- [ ] 3. Create `src/services/generateSchedule.ts` by adapting `../gantt-chart/src/services/generateSchedule.ts`. Keep `buildPrng`, `selectPredecessorIndices`, `selectPrimaryPredecessorIndex`, `selectMergePredecessorIndex`, `buildWbs`, and the id-builder helpers unchanged. Replace the node-building so projects and phases become group activities, leaves carry `type`/`parentId`, edges carry an `id`, and the return is `{ activities, dependencies }`:
 
 ```ts
 /**
@@ -1550,15 +1550,19 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ## Task 5: Incremental downstream-cone recompute
 
+The recompute is optimistic and two-phase, matching section 6 of the spec ("early dates flow downstream; global float and the critical path are refreshed a beat later"). Phase 1 (`computeConeEarlyDates`) is the local, immediate, main-thread step the store runs synchronously on every timing edit: it recomputes only the downstream cone's EARLY dates so the drag or edit feels live. Phase 2 (`computeDownstreamCone`) is the authoritative global pass the worker runs a beat later: a full `computeSchedule` plus diff-vs-cache that returns the whole changed delta, including the corrected `lateStart`/`lateFinish`/`totalFloat`/`isCritical`. This task builds both halves plus the `selectDownstreamCone` traversal they share.
+
 **Files:**
-- Create: `src/services/cpm/selectDownstreamCone.ts`, `src/services/cpm/computeDownstreamCone.ts`
-- Test: `src/__tests__/services/cpm/selectDownstreamCone.test.ts`, `src/__tests__/services/cpm/computeDownstreamCone.test.ts`
+- Create: `src/services/cpm/selectDownstreamCone.ts`, `src/services/cpm/computeConeEarlyDates.ts`, `src/services/cpm/computeDownstreamCone.ts`
+- Modify: `src/services/cpm/computeSchedule.ts` (export the existing `earlyStartFromDependency` helper; visibility-only, no algorithm change)
+- Test: `src/__tests__/services/cpm/selectDownstreamCone.test.ts`, `src/__tests__/services/cpm/computeConeEarlyDates.test.ts`, `src/__tests__/services/cpm/computeDownstreamCone.test.ts`
 
 **Interfaces:**
-- Consumes: `computeSchedule` (Task 3), `selectLeafActivities` (Task 3), `ScheduleGraph`, `ComputedActivity` (Task 2).
+- Consumes: `computeSchedule` and its exported `earlyStartFromDependency` helper (Task 3, this task exports the helper), `selectLeafActivities` (Task 3), `sortActivitiesTopologically` (Task 3), `ScheduleGraph`, `Dependency`, `ComputedActivity` (Task 2).
 - Produces:
-  - `selectDownstreamCone(graph: ScheduleGraph, activityId: string): Set<string>` returning `activityId` plus every transitively reachable successor (leaf adjacency).
-  - `computeDownstreamCone(graph: ScheduleGraph, previousComputed: Map<string, ComputedActivity>): { computed: Map<string, ComputedActivity>; delta: ComputedActivity[] }` where `computed` is the full new leaf computation and `delta` is the subset whose `ComputedActivity` differs from `previousComputed`. Merging `delta` into `previousComputed` equals `computed`.
+  - `selectDownstreamCone(graph: ScheduleGraph, activityId: string): Set<string>` returning `activityId` plus every transitively reachable successor (leaf adjacency). Unchanged single-id signature; `computeConeEarlyDates` unions it across the changed-id list.
+  - `computeConeEarlyDates(leafGraph: ScheduleGraph, changedActivityIds: string[], previousComputed: Map<string, ComputedActivity>): ComputedActivity[]` (phase 1): returns one `ComputedActivity` per cone member carrying UPDATED `earlyStart`/`earlyFinish` and the STALE `lateStart`/`lateFinish`/`totalFloat`/`isCritical` copied verbatim from `previousComputed`. Predecessors outside the cone are read from `previousComputed`; predecessors inside the cone use the freshly recomputed early dates. Throws if a cone member is absent from `previousComputed`.
+  - `computeDownstreamCone(graph: ScheduleGraph, previousComputed: Map<string, ComputedActivity>): { computed: Map<string, ComputedActivity>; delta: ComputedActivity[] }` (phase 2) where `computed` is the full new leaf computation and `delta` is the subset whose `ComputedActivity` differs from `previousComputed`. Merging `delta` into `previousComputed` equals `computed`.
 
 **Steps:**
 
@@ -1784,10 +1788,251 @@ npx vitest run src/__tests__/services/cpm/computeDownstreamCone.test.ts
 ```
 Expected: `2 passed`.
 
-- [ ] 9. Commit:
+- [ ] 9. Phase 1 needs the engine's per-dependency early-start formula, and it must not be duplicated. Export the existing pure helper `earlyStartFromDependency` from `src/services/cpm/computeSchedule.ts` so `computeSchedule` and `computeConeEarlyDates` share one implementation of the FS/SS/FF/SF switch. This is a visibility-only change: add the `export` keyword to the existing declaration and change nothing else, so the "engine ported unchanged" constraint holds (the helper stays in `computeSchedule.ts`, its home, rather than moving). It is now a helper shared by two public functions, which is the shared-implementation case R-235 calls for; flag it for the reviewer as a visibility change, not an engine modification. Change the declaration:
+
+```ts
+function earlyStartFromDependency(
+```
+
+to:
+
+```ts
+export function earlyStartFromDependency(
+```
+
+- [ ] 10. Write the failing test `src/__tests__/services/cpm/computeConeEarlyDates.test.ts`:
+
+```ts
+import { describe, expect, test } from "vitest";
+
+import { computeConeEarlyDates } from "../../../services/cpm/computeConeEarlyDates";
+import { computeSchedule } from "../../../services/cpm/computeSchedule";
+import { selectLeafActivities } from "../../../services/cpm/selectLeafActivities";
+import { generateSchedule } from "../../../services/generateSchedule";
+import type { ComputedActivity, ScheduleGraph } from "../../../types/schedule";
+
+function fullCompute(graph: ScheduleGraph): Map<string, ComputedActivity> {
+    const result = computeSchedule(selectLeafActivities(graph));
+    if (!result.ok) {
+        throw new Error("fixture unexpectedly cyclic");
+    }
+    return result.activities;
+}
+
+function stale(
+    id: string,
+    earlyStart: number,
+    earlyFinish: number,
+    lateStart: number,
+    lateFinish: number,
+    isCritical: boolean,
+): ComputedActivity {
+    return {
+        earlyFinish,
+        earlyStart,
+        id,
+        isCritical,
+        lateFinish,
+        lateStart,
+        totalFloat: lateStart - earlyStart,
+    };
+}
+
+describe("computeConeEarlyDates", () => {
+    test("phase-1 early dates match a full computeSchedule for every cone member", () => {
+        const graph = generateSchedule({ activityCount: 120, seed: 4 });
+        const leaves = graph.activities.filter((activity) => activity.type !== "group");
+        const previousComputed = fullCompute(graph);
+
+        const target = leaves[10];
+        target.durationDays += 7;
+
+        const coneDelta = computeConeEarlyDates(
+            selectLeafActivities(graph),
+            [target.id],
+            previousComputed,
+        );
+        const authoritative = fullCompute(graph);
+
+        expect(coneDelta.length).toBeGreaterThan(0);
+        for (const entry of coneDelta) {
+            expect(entry.earlyStart).toBe(authoritative.get(entry.id)?.earlyStart);
+            expect(entry.earlyFinish).toBe(authoritative.get(entry.id)?.earlyFinish);
+        }
+    });
+
+    test("a predecessor outside the cone is read from previousComputed, not recomputed", () => {
+        // a -> b -> c, all leaves. Changing b cones to {b, c}; a is upstream and outside.
+        const graph: ScheduleGraph = {
+            activities: [
+                { durationDays: 5, id: "a", name: "a", parentId: "ph", type: "task", wbs: "1" },
+                { durationDays: 4, id: "b", name: "b", parentId: "ph", type: "task", wbs: "2" },
+                { durationDays: 2, id: "c", name: "c", parentId: "ph", type: "task", wbs: "3" },
+            ],
+            dependencies: [
+                { id: "a->b", lagDays: 0, predecessorId: "a", successorId: "b", type: "FS" },
+                { id: "b->c", lagDays: 0, predecessorId: "b", successorId: "c", type: "FS" },
+            ],
+        };
+
+        // Tamper a's cached early finish to a sentinel so the assertion proves the cone
+        // reads it verbatim from previousComputed instead of recomputing activity "a".
+        const previousComputed = new Map<string, ComputedActivity>([
+            ["a", stale("a", 0, 100, 0, 100, false)],
+            ["b", stale("b", 5, 8, 5, 8, true)],
+            ["c", stale("c", 8, 10, 8, 10, false)],
+        ]);
+
+        const coneDelta = computeConeEarlyDates(graph, ["b"], previousComputed);
+        const byId = new Map(coneDelta.map((entry) => [entry.id, entry]));
+
+        expect(byId.has("a")).toBe(false);
+        expect(byId.get("b")?.earlyStart).toBe(100);
+        expect(byId.get("b")?.earlyFinish).toBe(104);
+        expect(byId.get("c")?.earlyStart).toBe(104);
+        // Stale late/float/critical are carried verbatim for phase 2 to correct.
+        expect(byId.get("b")?.lateStart).toBe(5);
+        expect(byId.get("b")?.isCritical).toBe(true);
+    });
+});
+```
+
+- [ ] 11. Run it, expect FAIL.
 
 ```
-git add -A && git commit -m "feat: add downstream-cone selection and incremental recompute delta
+npx vitest run src/__tests__/services/cpm/computeConeEarlyDates.test.ts
+```
+Expected: fails to resolve the module.
+
+- [ ] 12. Create `src/services/cpm/computeConeEarlyDates.ts`:
+
+```ts
+/**
+ * Phase 1 of the two-phase recompute: the local, immediate, main-thread step.
+ * When an operation changes timing, this recomputes only the downstream cone's
+ * EARLY dates (earlyStart/earlyFinish) and returns them at once so a drag or edit
+ * feels live. Late dates, total float, and the critical flag are global
+ * properties; they are NOT recomputed here. Each returned ComputedActivity
+ * carries its updated early dates and the stale lateStart/lateFinish/totalFloat/
+ * isCritical copied verbatim from previousComputed, which phase 2 (the worker's
+ * full computeDownstreamCone pass) corrects a beat later.
+ */
+import type { ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
+
+import { earlyStartFromDependency } from "./computeSchedule";
+import { selectDownstreamCone } from "./selectDownstreamCone";
+import { sortActivitiesTopologically } from "./sortActivitiesTopologically";
+
+export function computeConeEarlyDates(
+    leafGraph: ScheduleGraph,
+    changedActivityIds: string[],
+    previousComputed: Map<string, ComputedActivity>,
+): ComputedActivity[] {
+    const cone = collectChangedCone(leafGraph, changedActivityIds);
+    const dependenciesBySuccessor = groupDependenciesBySuccessor(leafGraph.dependencies);
+    const durations = buildDurationMap(leafGraph);
+    const orderedConeActivities = sortActivitiesTopologically(leafGraph).filter((activity) =>
+        cone.has(activity.id),
+    );
+
+    const earlyStart = new Map<string, number>();
+    const earlyFinish = new Map<string, number>();
+    const delta: ComputedActivity[] = [];
+
+    for (const activity of orderedConeActivities) {
+        const stale = previousComputed.get(activity.id);
+        if (stale === undefined) {
+            throw new Error(
+                `computeConeEarlyDates: cone activity ${activity.id} is missing from previousComputed`,
+            );
+        }
+
+        const activityDuration = durations.get(activity.id) ?? 0;
+        const predecessors = dependenciesBySuccessor.get(activity.id) ?? [];
+
+        let start = 0;
+        for (const dependency of predecessors) {
+            const candidate = earlyStartFromDependency(
+                dependency,
+                readEarlyStart(dependency.predecessorId, cone, earlyStart, previousComputed),
+                readEarlyFinish(dependency.predecessorId, cone, earlyFinish, previousComputed),
+                activityDuration,
+            );
+            start = Math.max(start, candidate);
+        }
+
+        earlyStart.set(activity.id, start);
+        earlyFinish.set(activity.id, start + activityDuration);
+        delta.push({ ...stale, earlyFinish: start + activityDuration, earlyStart: start });
+    }
+
+    return delta;
+}
+
+function collectChangedCone(leafGraph: ScheduleGraph, changedActivityIds: string[]): Set<string> {
+    const cone = new Set<string>();
+    for (const activityId of changedActivityIds) {
+        for (const member of selectDownstreamCone(leafGraph, activityId)) {
+            cone.add(member);
+        }
+    }
+    return cone;
+}
+
+function groupDependenciesBySuccessor(dependencies: Dependency[]): Map<string, Dependency[]> {
+    const grouped = new Map<string, Dependency[]>();
+    for (const dependency of dependencies) {
+        const existing = grouped.get(dependency.successorId) ?? [];
+        existing.push(dependency);
+        grouped.set(dependency.successorId, existing);
+    }
+    return grouped;
+}
+
+function buildDurationMap(graph: ScheduleGraph): Map<string, number> {
+    const durations = new Map<string, number>();
+    for (const activity of graph.activities) {
+        durations.set(activity.id, activity.durationDays);
+    }
+    return durations;
+}
+
+function readEarlyStart(
+    predecessorId: string,
+    cone: Set<string>,
+    freshEarlyStart: Map<string, number>,
+    previousComputed: Map<string, ComputedActivity>,
+): number {
+    if (cone.has(predecessorId)) {
+        return freshEarlyStart.get(predecessorId) ?? 0;
+    }
+    return previousComputed.get(predecessorId)?.earlyStart ?? 0;
+}
+
+function readEarlyFinish(
+    predecessorId: string,
+    cone: Set<string>,
+    freshEarlyFinish: Map<string, number>,
+    previousComputed: Map<string, ComputedActivity>,
+): number {
+    if (cone.has(predecessorId)) {
+        return freshEarlyFinish.get(predecessorId) ?? 0;
+    }
+    return previousComputed.get(predecessorId)?.earlyFinish ?? 0;
+}
+```
+
+- [ ] 13. Run it, expect PASS.
+
+```
+npx vitest run src/__tests__/services/cpm/computeConeEarlyDates.test.ts
+```
+Expected: `2 passed`.
+
+- [ ] 14. Commit:
+
+```
+git add -A && git commit -m "feat: add downstream-cone selection with phase-1 early-date and phase-2 full recompute
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1795,6 +2040,8 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ---
 
 ## Task 6: Pure worker-message handler
+
+This handler is the PHASE 2 path of the two-phase recompute: the authoritative global pass. Phase 1 (the cone's early dates, Task 5's `computeConeEarlyDates`) runs synchronously in the store (Task 7) the instant an edit lands so the drag feels live; phase 2 runs here, off the main thread in the worker, a beat later. An `operation` message therefore returns the authoritative global delta (early dates plus the corrected `lateStart`/`lateFinish`/`totalFloat`/`isCritical`), which the store merges to fix any value phase 1 left stale. No new worker function is needed for the split; phase 1 lives entirely in the store.
 
 **Files:**
 - Create: `src/workers/handleWorkerMessage.ts`, `src/workers/cpmWorker.ts`
@@ -1805,7 +2052,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Produces:
   - `type WorkerMessage = { graph: ScheduleGraph; kind: "full" } | { graph: ScheduleGraph; kind: "operation"; operation: Operation }`
   - `type WorkerResult = { computed: Map<string, ComputedActivity>; delta: ComputedActivity[] }`
-  - `handleWorkerMessage(message: WorkerMessage, previousComputed: Map<string, ComputedActivity>): WorkerResult`. `full` returns every leaf ComputedActivity as the delta and the new map as `computed`; `operation` returns the changed delta and the new map; a `toggleCollapse` operation returns an empty delta with `computed` echoing `previousComputed` (no recompute).
+  - `handleWorkerMessage(message: WorkerMessage, previousComputed: Map<string, ComputedActivity>): WorkerResult`. `full` returns every leaf ComputedActivity as the delta and the new map as `computed`; `operation` runs the phase-2 full recompute and returns the authoritative global delta (the changed subset, float and critical-path corrected) plus the new map; a `toggleCollapse` operation returns an empty delta with `computed` echoing `previousComputed` (no recompute).
 
 **Steps:**
 
@@ -1975,11 +2222,11 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Test: `src/__tests__/state/scheduleStore.test.ts`, `src/__tests__/state/useScheduleSelection.test.ts`
 
 **Interfaces:**
-- Consumes: `handleWorkerMessage` (Task 6), `Operation` + guards (Task 2), `ScheduleGraph`, `Activity`, `Dependency`, `ComputedActivity` (Task 2).
+- Consumes: `computeConeEarlyDates` (Task 5), `selectLeafActivities` (Task 3), `handleWorkerMessage` (Task 6), `Operation` + guards (Task 2), `ScheduleGraph`, `Activity`, `Dependency`, `ComputedActivity` (Task 2).
 - Produces:
   - `useScheduleStore` Zustand store with state `{ graph: ScheduleGraph; computed: Map<string, ComputedActivity>; collapsed: Set<string> }` and actions `loadGraph(graph: ScheduleGraph): void`, `dispatchOperation(operation: Operation): { ok: boolean }`.
   - `useScheduleSelection` Zustand store with `{ selectedActivityId: string | null; selectActivity(id: string | null): void }`.
-- Note: Task 7 wires `dispatchOperation` to the synchronous main-thread path via `handleWorkerMessage`; Task 11 swaps in the actual worker with this same path as the fallback. The cycle-rejection branch is added in Task 8.
+- Note: `dispatchOperation` is two-phase. Phase 1 runs synchronously on the main thread via `computeConeEarlyDates` (the cone's early dates, applied at once so the edit feels live). Phase 2 is the authoritative global pass via `handleWorkerMessage`; Task 7 runs it synchronously on the main thread, and Task 11 swaps in the actual worker with this same synchronous call as the worker-unavailable fallback. The cycle-rejection branch is added in Task 8.
 
 **Steps:**
 
@@ -2006,6 +2253,26 @@ const GRAPH: ScheduleGraph = {
         task("b", 3, "ph"),
     ],
     dependencies: [edge("e1", "a", "b")],
+};
+
+const FLOAT_GRAPH: ScheduleGraph = {
+    activities: [
+        { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
+        task("S", 0, "ph"),
+        task("A", 4, "ph"),
+        task("B", 2, "ph"),
+        task("C", 5, "ph"),
+        task("D", 3, "ph"),
+        task("E", 0, "ph"),
+    ],
+    dependencies: [
+        edge("S->A", "S", "A"),
+        edge("S->B", "S", "B"),
+        edge("A->C", "A", "C"),
+        edge("B->D", "B", "D"),
+        edge("C->E", "C", "E"),
+        edge("D->E", "D", "E"),
+    ],
 };
 
 describe("useScheduleStore", () => {
@@ -2056,6 +2323,34 @@ describe("useScheduleStore", () => {
         useScheduleStore.getState().dispatchOperation({ kind: "toggleCollapse", rowId: "ph" });
         expect(useScheduleStore.getState().collapsed.has("ph")).toBe(false);
     });
+
+    test("resize recomputes downstream early dates (phase 1) and corrects global float and critical (phase 2)", () => {
+        useScheduleStore.getState().loadGraph(structuredClone(FLOAT_GRAPH));
+
+        // Before: S->A(4)->C(5)->E is the critical chain (length 9); S->B(2)->D(3)->E carries float 4.
+        expect(useScheduleStore.getState().computed.get("A")?.isCritical).toBe(true);
+        expect(useScheduleStore.getState().computed.get("B")?.totalFloat).toBe(4);
+
+        useScheduleStore.getState().dispatchOperation({
+            activityId: "B",
+            durationDays: 8,
+            kind: "resizeActivity",
+        });
+        const { computed } = useScheduleStore.getState();
+
+        // Phase 1 (local, synchronous): the downstream cone of B (B, D, E) has fresh early dates.
+        expect(computed.get("B")?.earlyFinish).toBe(8);
+        expect(computed.get("D")?.earlyStart).toBe(8);
+        expect(computed.get("E")?.earlyStart).toBe(11);
+
+        // Phase 2 (global): B->D->E is now critical (length 11); A and C sit OUTSIDE B's cone
+        // yet their float and critical flag are corrected by the full pass.
+        expect(computed.get("B")?.isCritical).toBe(true);
+        expect(computed.get("D")?.isCritical).toBe(true);
+        expect(computed.get("A")?.isCritical).toBe(false);
+        expect(computed.get("A")?.totalFloat).toBe(2);
+        expect(computed.get("C")?.totalFloat).toBe(2);
+    });
 });
 ```
 
@@ -2072,13 +2367,18 @@ Expected: fails to resolve `../../state/scheduleStore`.
 /**
  * Zustand store holding the single source of truth: the raw schedule graph
  * (stored inputs only), the computed cache (engine outputs, never persisted),
- * and the shared collapse set. dispatchOperation applies an operation to the raw
- * graph optimistically and merges the recomputed delta into the cache. Task 8
- * adds cycle rejection for addDependency; Task 11 routes recompute through the
- * web worker with this synchronous path as the fallback.
+ * and the shared collapse set. dispatchOperation is two-phase: it applies the
+ * operation to the raw graph, then PHASE 1 recomputes the downstream cone's early
+ * dates synchronously (computeConeEarlyDates) and merges them at once so the edit
+ * feels live, then PHASE 2 runs the authoritative global pass (handleWorkerMessage)
+ * and merges its delta to correct float and the critical path. Task 8 adds cycle
+ * rejection for addDependency; Task 11 routes phase 2 through the web worker with
+ * this synchronous path as the fallback.
  */
 import { create } from "zustand";
 
+import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
+import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
 import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 import type { Operation } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
@@ -2100,12 +2400,23 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
             return { ok: true };
         }
 
+        const changedActivityIds = selectChangedActivityIds(get().graph, operation);
         const graph = applyOperationToGraph(get().graph, operation);
-        const { computed, delta } = handleWorkerMessage(
-            { graph, kind: "operation", operation },
+
+        // Phase 1 (local, immediate, main thread): recompute only the downstream cone's
+        // early dates and merge them at once so the edit feels live.
+        const earlyDelta = computeConeEarlyDates(
+            selectLeafActivities(graph),
+            changedActivityIds,
             get().computed,
         );
-        set({ computed: mergeComputedDelta(computed, delta), graph });
+        set({ computed: mergeComputedDelta(get().computed, earlyDelta), graph });
+
+        // Phase 2 (global, a beat later): the authoritative full pass that corrects float
+        // and the critical flag. Task 7 runs it synchronously; Task 11 posts it to the
+        // worker and keeps this synchronous call as the worker-unavailable fallback.
+        const { delta } = handleWorkerMessage({ graph, kind: "operation", operation }, get().computed);
+        set({ computed: mergeComputedDelta(get().computed, delta) });
         return { ok: true };
     },
     graph: { activities: [], dependencies: [] },
@@ -2149,6 +2460,21 @@ function mergeComputedDelta(
     return next;
 }
 
+function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): string[] {
+    switch (operation.kind) {
+        case "addDependency":
+            return [operation.edge.successorId];
+        case "removeDependency": {
+            const removed = graph.dependencies.find((edge) => edge.id === operation.edgeId);
+            return removed === undefined ? [] : [removed.successorId];
+        }
+        case "resizeActivity":
+            return [operation.activityId];
+        case "toggleCollapse":
+            return [];
+    }
+}
+
 function toggleMembership(members: Set<string>, id: string): Set<string> {
     const next = new Set(members);
     if (next.has(id)) {
@@ -2160,14 +2486,14 @@ function toggleMembership(members: Set<string>, id: string): Set<string> {
 }
 ```
 
-> Note: `handleWorkerMessage` for an `operation` recomputes the full leaf schedule and returns the delta, so `mergeComputedDelta(computed, delta)` equals `computed`; using the returned `computed` directly is also correct. The merge path is kept because Task 11's worker posts back only `delta`, and the store merges it into its existing cache.
+> Note: Phase 1 merges only the cone's early-date delta, so the cache is correct-but-incomplete for a beat (float and critical may be stale on the just-edited cone). Phase 2's `handleWorkerMessage` recomputes the full leaf schedule against the post-phase-1 cache and returns a delta that is exactly the activities still differing (the float and critical corrections, plus any global float shift outside the cone); merging it yields the authoritative cache. The merge path is kept because Task 11's worker posts back only `delta`, and the store merges it into its existing cache.
 
 - [ ] 4. Run it, expect PASS.
 
 ```
 npx vitest run src/__tests__/state/scheduleStore.test.ts
 ```
-Expected: `5 passed`.
+Expected: `6 passed`.
 
 - [ ] 5. Write the failing test `src/__tests__/state/useScheduleSelection.test.ts`:
 
@@ -2391,7 +2717,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Steps:**
 
-- [ ] 1. Copy and adapt `src/api/fetchScheduleGraph.ts` from `/Users/iangreenough/Desktop/code/personal/production/gantt-chart/src/api/fetchScheduleGraph.ts`. The body is unchanged; the return type is already `Promise<ScheduleGraph>` which now resolves to the two-array shape. Keep it verbatim.
+- [ ] 1. Copy and adapt `src/api/fetchScheduleGraph.ts` from `../gantt-chart/src/api/fetchScheduleGraph.ts`. The body is unchanged; the return type is already `Promise<ScheduleGraph>` which now resolves to the two-array shape. Keep it verbatim.
 
 - [ ] 2. Replace `src/mocks/handlers.ts` with the schedule-graph handler (adapted: single unified graph, no projects route):
 
@@ -2903,24 +3229,247 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-## Task 11: DHTMLX Gantt view and lifecycle hook
+## Task 11: DHTMLX Gantt view and worker-backed two-phase recompute
 
 **Files:**
 - Create: `src/components/GanttView/useGanttInit.ts`, `src/components/GanttView/GanttView.tsx`
-- Modify: `src/state/scheduleStore.ts` (route recompute through the worker with a synchronous fallback), `src/components/AppShell/AppShell.tsx` (render the Gantt)
-- Test: `e2e/ganttRender.spec.ts`
+- Modify: `src/state/scheduleStore.ts` (restore the two-phase recompute and route phase 2 through the worker with a synchronous fallback), `src/workers/cpmWorker.ts` (carry the previous computed cache in the request, drop the worker-held cache), `src/components/AppShell/AppShell.tsx` (render the Gantt)
+- Test: `src/__tests__/state/scheduleStoreTwoPhase.test.ts`, `e2e/ganttRender.spec.ts`
 
 **Interfaces:**
-- Consumes: `toGanttTasks`, `toGanttLinks`, `resolveCriticalTaskClass` (Task 10), `createCalendar` (Task 3), `useScheduleStore` (Task 7), `Operation` (Task 2), scale constants (Task 2).
+- Consumes: `computeConeEarlyDates` (Task 5), `selectLeafActivities` (Task 3), `detectCycle` (Task 3), `handleWorkerMessage` (Task 6), `toGanttTasks`, `toGanttLinks`, `resolveCriticalTaskClass` (Task 10), `createCalendar` (Task 3), `useScheduleStore` (Task 7), `Operation` (Task 2), scale constants (Task 2).
 - Produces:
+  - A genuinely two-phase `dispatchOperation`: PHASE 1 merges the downstream cone's early dates synchronously on the main thread (the instant optimistic update the user sees), PHASE 2 posts to the real CPM worker and merges its authoritative global delta a beat later, falling back to a synchronous `handleWorkerMessage` pass when no Worker exists. The cycle gate and the return type `{ ok: true } | { cycle: string[]; ok: false }` are unchanged.
+  - `reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void` store action running phase 2 (the worker when available, the synchronous fallback otherwise).
+  - `CpmWorkerRequest` wire type (exported from `cpmWorker.ts`) carrying `graph`, `operation`, and the serialized `previousComputed` entries so the worker can diff. `handleWorkerMessage` keeps its pure `(message, previousComputed)` signature and its `full` | `operation` message kinds unchanged.
   - `useGanttInit(containerRef: RefObject<HTMLDivElement | null>): void` initializing DHTMLX once, parsing tasks/links, subscribing to the store for batched updates, and translating drag/resize to a `resizeActivity` operation.
   - `GanttView(): JSX.Element` rendering the stable container.
 
 **Steps:**
 
-- [ ] 1. Add an optional async recompute path to the store. Edit `src/state/scheduleStore.ts` to construct the worker lazily and fall back to the synchronous path on failure. Add near the top, after imports:
+- [ ] 1. Write the failing test `src/__tests__/state/scheduleStoreTwoPhase.test.ts`. The on-disk store after Task 8 is single-phase (one `set` per `dispatchOperation`; phase 1 is not wired in), so this asserts the restored two-phase behavior: phase 1 lands as its own `set` with the cone's early dates before phase 2 corrects the global float and critical flag. Each computed snapshot is captured through a store subscription, a real behavioral assertion rather than a mock-call count.
 
 ```ts
+import { beforeEach, describe, expect, test } from "vitest";
+
+import { useScheduleStore } from "../../state/scheduleStore";
+import type { Activity, ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
+
+function task(id: string, durationDays: number): Activity {
+    return { durationDays, id, name: id, parentId: "ph", type: "task", wbs: id };
+}
+
+function edge(id: string, predecessorId: string, successorId: string): Dependency {
+    return { id, lagDays: 0, predecessorId, successorId, type: "FS" };
+}
+
+// Two paths from S to E: S->A(4)->C(5)->E (the critical chain, length 9) and
+// S->B(2)->D(3)->E (float 4). Resizing B to 8 makes B->D->E critical (length 11)
+// and corrects A and C, which sit OUTSIDE B's downstream cone.
+const FLOAT_GRAPH: ScheduleGraph = {
+    activities: [
+        { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
+        task("S", 0),
+        task("A", 4),
+        task("B", 2),
+        task("C", 5),
+        task("D", 3),
+        task("E", 0),
+    ],
+    dependencies: [
+        edge("S->A", "S", "A"),
+        edge("S->B", "S", "B"),
+        edge("A->C", "A", "C"),
+        edge("B->D", "B", "D"),
+        edge("C->E", "C", "E"),
+        edge("D->E", "D", "E"),
+    ],
+};
+
+describe("useScheduleStore two-phase recompute", () => {
+    beforeEach(() => {
+        useScheduleStore.getState().loadGraph(structuredClone(FLOAT_GRAPH));
+    });
+
+    test("phase 1 updates the cone's early dates before phase 2 corrects global float and critical", () => {
+        const snapshots: Map<string, ComputedActivity>[] = [];
+        const unsubscribe = useScheduleStore.subscribe((state, previous) => {
+            if (state.computed !== previous.computed) {
+                snapshots.push(state.computed);
+            }
+        });
+
+        useScheduleStore.getState().dispatchOperation({
+            activityId: "B",
+            durationDays: 8,
+            kind: "resizeActivity",
+        });
+        unsubscribe();
+
+        // Phase 1 then phase 2 each merge once, so two distinct snapshots land.
+        expect(snapshots.length).toBeGreaterThanOrEqual(2);
+
+        // Phase 1 (first snapshot): the downstream cone of B (B, D, E) has fresh EARLY
+        // dates, but global critical/float are still the pre-edit values. B is not yet
+        // flagged critical and A (outside the cone) still carries its pre-edit flag.
+        const afterPhaseOne = snapshots[0];
+        expect(afterPhaseOne.get("B")?.earlyFinish).toBe(8);
+        expect(afterPhaseOne.get("D")?.earlyStart).toBe(8);
+        expect(afterPhaseOne.get("E")?.earlyStart).toBe(11);
+        expect(afterPhaseOne.get("B")?.isCritical).toBe(false);
+        expect(afterPhaseOne.get("A")?.isCritical).toBe(true);
+
+        // Phase 2 (last snapshot): the authoritative global pass corrects critical and
+        // float across the whole schedule, including out-of-cone A and C.
+        const afterPhaseTwo = snapshots[snapshots.length - 1];
+        expect(afterPhaseTwo.get("B")?.isCritical).toBe(true);
+        expect(afterPhaseTwo.get("D")?.isCritical).toBe(true);
+        expect(afterPhaseTwo.get("A")?.isCritical).toBe(false);
+        expect(afterPhaseTwo.get("A")?.totalFloat).toBe(2);
+        expect(afterPhaseTwo.get("C")?.totalFloat).toBe(2);
+    });
+});
+```
+
+- [ ] 2. Run it, expect FAIL.
+
+```
+npx vitest run src/__tests__/state/scheduleStoreTwoPhase.test.ts
+```
+Expected: fails on `expect(snapshots.length).toBeGreaterThanOrEqual(2)` (the single-phase store merges once) and on the phase-1 critical-flag separation.
+
+- [ ] 3. Restore the two-phase recompute and route phase 2 through the worker. Replace `src/state/scheduleStore.ts` in full:
+
+```ts
+/**
+ * Zustand store holding the single source of truth: the raw schedule graph
+ * (stored inputs only), the computed cache (engine outputs, never persisted), and
+ * the shared collapse set. dispatchOperation is two-phase. PHASE 1 recomputes the
+ * downstream cone's early dates synchronously on the main thread
+ * (computeConeEarlyDates) and merges them at once, so the edit is visible before
+ * the worker responds. PHASE 2 runs the authoritative global pass that corrects
+ * float and the critical path: it posts to the CPM web worker when one exists and
+ * merges the worker's delta a beat later, falling back to a synchronous
+ * handleWorkerMessage pass when no Worker is available (jsdom, SSR). addDependency
+ * is gated by detectCycle against the prospective graph and rejected without
+ * mutation. The net final cache equals a full recompute on either phase-2 path.
+ */
+import { create } from "zustand";
+
+import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
+import { detectCycle } from "../services/cpm/detectCycle";
+import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
+import { handleWorkerMessage } from "../workers/handleWorkerMessage";
+import type { Operation } from "../types/operation";
+import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
+import type { CpmWorkerRequest } from "../workers/cpmWorker";
+
+interface ScheduleState {
+    collapsed: Set<string>;
+    computed: Map<string, ComputedActivity>;
+    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false };
+    graph: ScheduleGraph;
+    loadGraph(graph: ScheduleGraph): void;
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void;
+}
+
+export const useScheduleStore = create<ScheduleState>((set, get) => ({
+    collapsed: new Set<string>(),
+    computed: new Map<string, ComputedActivity>(),
+    dispatchOperation(operation: Operation): { ok: true } | { cycle: string[]; ok: false } {
+        if (operation.kind === "toggleCollapse") {
+            set((state) => ({ collapsed: toggleMembership(state.collapsed, operation.rowId) }));
+            return { ok: true };
+        }
+
+        const changedActivityIds = selectChangedActivityIds(get().graph, operation);
+        const graph = applyOperationToGraph(get().graph, operation);
+
+        if (operation.kind === "addDependency") {
+            const cycle = detectCycle(graph);
+            if (cycle !== null) {
+                return { cycle, ok: false };
+            }
+        }
+
+        // Phase 1 (synchronous, main thread): recompute only the downstream cone's
+        // early dates and merge them at once so the edit is visible before the worker
+        // responds. Float and the critical flag stay stale on the cone for a beat.
+        const earlyDelta = computeConeEarlyDates(
+            selectLeafActivities(graph),
+            changedActivityIds,
+            get().computed,
+        );
+        set({ computed: mergeComputedDelta(get().computed, earlyDelta), graph });
+
+        // Phase 2 (asynchronous worker, or synchronous fallback): the authoritative
+        // global pass that corrects float and the critical flag across the whole
+        // schedule, including activities outside the cone.
+        get().reconcileGlobalPass(graph, operation);
+        return { ok: true };
+    },
+    graph: { activities: [], dependencies: [] },
+    loadGraph(graph: ScheduleGraph): void {
+        const { computed } = handleWorkerMessage({ graph, kind: "full" }, new Map());
+        set({ collapsed: new Set<string>(), computed, graph });
+    },
+    reconcileGlobalPass(graph: ScheduleGraph, operation: Operation): void {
+        const worker = getCpmWorker();
+        if (worker === null) {
+            const { delta } = handleWorkerMessage(
+                { graph, kind: "operation", operation },
+                get().computed,
+            );
+            set({ computed: mergeComputedDelta(get().computed, delta) });
+            return;
+        }
+
+        worker.onmessage = (event: MessageEvent<ComputedActivity[]>): void => {
+            set((state) => ({ computed: mergeComputedDelta(state.computed, event.data) }));
+        };
+        const request: CpmWorkerRequest = {
+            graph,
+            operation,
+            previousComputed: [...get().computed.entries()],
+        };
+        worker.postMessage(request);
+    },
+}));
+
+let cpmWorker: Worker | null = null;
+let workerInitialized = false;
+
+function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): ScheduleGraph {
+    switch (operation.kind) {
+        case "addDependency":
+            return { activities: graph.activities, dependencies: [...graph.dependencies, operation.edge] };
+        case "removeDependency":
+            return {
+                activities: graph.activities,
+                dependencies: graph.dependencies.filter((edge) => edge.id !== operation.edgeId),
+            };
+        case "resizeActivity":
+            return {
+                activities: graph.activities.map((activity) =>
+                    activity.id === operation.activityId
+                        ? { ...activity, durationDays: operation.durationDays }
+                        : activity,
+                ),
+                dependencies: graph.dependencies,
+            };
+        case "toggleCollapse":
+            return graph;
+    }
+}
+
+function getCpmWorker(): Worker | null {
+    if (!workerInitialized) {
+        cpmWorker = createCpmWorker();
+        workerInitialized = true;
+    }
+    return cpmWorker;
+}
+
 function createCpmWorker(): Worker | null {
     try {
         return new Worker(new URL("../workers/cpmWorker.ts", import.meta.url), { type: "module" });
@@ -2929,40 +3478,87 @@ function createCpmWorker(): Worker | null {
     }
 }
 
-let cpmWorker: Worker | null = null;
-```
+function mergeComputedDelta(
+    computed: Map<string, ComputedActivity>,
+    delta: ComputedActivity[],
+): Map<string, ComputedActivity> {
+    const next = new Map(computed);
+    for (const entry of delta) {
+        next.set(entry.id, entry);
+    }
+    return next;
+}
 
-  The synchronous `dispatchOperation` written in Tasks 7 and 8 remains the source of truth for tests and the fallback. Add a `postToWorker` action to the interface and store that posts to the worker when available (the worker posts back the delta and the store merges it); when the worker is null it is a no-op because the synchronous path already merged. Add to the interface:
-
-```ts
-    syncWithWorker(graph: ScheduleGraph, operation: Operation): void;
-```
-
-  And to the store object:
-
-```ts
-    syncWithWorker(graph: ScheduleGraph, operation: Operation): void {
-        cpmWorker = cpmWorker ?? createCpmWorker();
-        if (cpmWorker === null) {
-            return;
+function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): string[] {
+    switch (operation.kind) {
+        case "addDependency":
+            return [operation.edge.successorId];
+        case "removeDependency": {
+            const removed = graph.dependencies.find((edge) => edge.id === operation.edgeId);
+            return removed === undefined ? [] : [removed.successorId];
         }
-        cpmWorker.onmessage = (event: MessageEvent<ComputedActivity[]>): void => {
-            set((state) => ({ computed: mergeComputedDelta(state.computed, event.data) }));
-        };
-        cpmWorker.postMessage({ graph, kind: "operation", operation });
-    },
+        case "resizeActivity":
+            return [operation.activityId];
+        case "toggleCollapse":
+            return [];
+    }
+}
+
+function toggleMembership(members: Set<string>, id: string): Set<string> {
+    const next = new Set(members);
+    if (next.has(id)) {
+        next.delete(id);
+    } else {
+        next.add(id);
+    }
+    return next;
+}
 ```
 
-  In `dispatchOperation`, after the successful `set({ computed: ..., graph })`, call `get().syncWithWorker(graph, operation)` for the non-collapse, non-rejected branch so the worker refreshes global float a beat later. This keeps the synchronous optimistic update visible-first and reconciles with the worker result. (The worker delta equals the synchronous result for these operations, so the reconciliation is idempotent.)
+> Note: Phase 1 merges only the cone's early-date delta, so the cache is correct-but-incomplete for a beat (float and critical stay stale on the cone). Phase 2 runs `computeDownstreamCone` over the full leaf graph against the post-phase-1 cache and returns the activities still differing (the float and critical corrections, plus any global float shift outside the cone). Under jsdom the Worker constructor throws and `getCpmWorker` returns null, so phase 2 runs synchronously and the final cache is authoritative; in the browser the worker posts the same delta back and the store merges it a beat later. The net final state equals a full recompute either way. `computeConeEarlyDates`, `selectLeafActivities`, `selectChangedActivityIds`, and `detectCycle` are all re-consumed here, un-orphaning `computeConeEarlyDates`.
 
-- [ ] 2. Add a one-line guard test that the store still passes after the edit.
+- [ ] 4. Update the worker entry so the store owns the cache and passes it on each request. Replace `src/workers/cpmWorker.ts` in full:
+
+```ts
+/**
+ * Web-worker entry for CPM recompute. Receives an operation request carrying the
+ * graph, the operation, and the serialized previous computed cache (as Map
+ * entries), reconstructs the Map, delegates to the pure handleWorkerMessage, and
+ * posts back only the changed delta so the main thread batch-updates the minimum
+ * set of rows and bars. Holds no cross-message state: the store owns the
+ * authoritative cache and passes it on every request. The store falls back to a
+ * synchronous handleWorkerMessage call when this worker fails to initialize.
+ */
+import { handleWorkerMessage } from "./handleWorkerMessage";
+import type { Operation } from "../types/operation";
+import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
+
+export interface CpmWorkerRequest {
+    graph: ScheduleGraph;
+    operation: Operation;
+    previousComputed: [string, ComputedActivity][];
+}
+
+self.onmessage = (event: MessageEvent<CpmWorkerRequest>): void => {
+    const { graph, operation, previousComputed } = event.data;
+    const { delta } = handleWorkerMessage(
+        { graph, kind: "operation", operation },
+        new Map(previousComputed),
+    );
+    self.postMessage(delta);
+};
+```
+
+> Note: the request serializes `previousComputed` as Map entries (a structured-clone-safe array) and the worker reconstructs the Map before calling the pure `handleWorkerMessage`, whose `(message, previousComputed)` signature stays unchanged. The store imports `CpmWorkerRequest` as a type only, so the worker's `self.onmessage` side effect is never pulled into the main bundle. An end-to-end assertion of the real worker path (phase 2 arriving asynchronously in the browser) is deferred to Task 13/15; this task verifies the worker contract and the synchronous fallback.
+
+- [ ] 5. Run the two-phase test plus the full state suite, expect PASS (the existing store tests pass through the synchronous fallback).
 
 ```
 npx vitest run src/__tests__/state
 ```
-Expected: all state suites pass (worker construction is guarded and returns null under jsdom, so the synchronous path is exercised).
+Expected: all state suites pass (`scheduleStoreTwoPhase`, `scheduleStore`, `scheduleStoreValidity`, `useScheduleSelection`). Worker construction is guarded and returns null under jsdom, so phase 2 takes the synchronous fallback.
 
-- [ ] 3. Create `src/components/GanttView/useGanttInit.ts`:
+- [ ] 6. Create `src/components/GanttView/useGanttInit.ts`:
 
 ```ts
 /**
@@ -3070,7 +3666,7 @@ function applyComputedToGantt(
 
 > Note: the `task_class` template reads the store live, so a critical-flag change re-applies on the next render; `applyComputedToGantt` triggers DHTMLX rendering inside `batchUpdate`. The drag handler uses `onAfterTaskDrag`; resize is the same drag mode in DHTMLX and fires the same event, so a single handler covers both bar-move-derived duration changes and resize.
 
-- [ ] 4. Create `src/components/GanttView/GanttView.tsx`:
+- [ ] 7. Create `src/components/GanttView/GanttView.tsx`:
 
 ```tsx
 /**
@@ -3096,7 +3692,7 @@ function GanttViewComponent(): JSX.Element {
 export const GanttView = memo(GanttViewComponent);
 ```
 
-- [ ] 5. Render the Gantt in the shell once loaded. Edit `src/components/AppShell/AppShell.tsx` to import `GanttView` and the DHTMLX CSS, and render it when not pending/error:
+- [ ] 8. Render the Gantt in the shell once loaded. Edit `src/components/AppShell/AppShell.tsx` to import `GanttView` and the DHTMLX CSS, and render it when not pending/error:
 
 ```tsx
 import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
@@ -3115,7 +3711,7 @@ import { useScheduleQuery } from "../../api/useScheduleQuery";
             ) : null}
 ```
 
-- [ ] 6. Write the Playwright smoke spec `e2e/ganttRender.spec.ts`:
+- [ ] 9. Write the Playwright smoke spec `e2e/ganttRender.spec.ts`:
 
 ```ts
 import { expect, test } from "@playwright/test";
@@ -3129,24 +3725,24 @@ test("renders Gantt bars for the seeded 5000-activity schedule", async ({ page }
 });
 ```
 
-- [ ] 7. Run the Playwright spec, expect PASS.
+- [ ] 10. Run the Playwright spec, expect PASS.
 
 ```
 npx playwright test e2e/ganttRender.spec.ts
 ```
 Expected: `1 passed` (DHTMLX smart-rendering paints the visible bar window).
 
-- [ ] 8. Run the full unit suite to confirm no regression.
+- [ ] 11. Run the full unit suite to confirm no regression.
 
 ```
 npx vitest run
 ```
 Expected: all suites pass.
 
-- [ ] 9. Commit:
+- [ ] 12. Commit:
 
 ```
-git add -A && git commit -m "feat: render the schedule in DHTMLX Gantt with worker-backed recompute
+git add -A && git commit -m "feat: render the schedule in DHTMLX Gantt with two-phase worker-backed recompute
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -3791,7 +4387,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 | 4 Architecture spine (store, derived compute, uncontrolled views) | 7, 11, 12, 13 |
 | 5 Data model (Activity, Dependency edge list, computed vs stored) | 2, 3 |
 | 5 Operations union | 2, 7 |
-| 6 CPM engine + worker boundary | 3, 5, 6, 11 |
+| 6 CPM engine + worker boundary (phase 1 cone early dates, phase 2 global float) | 3, 5, 6, 7, 11 |
 | 7 State (scheduleStore, useScheduleSelection) | 7, 13 |
 | 8 View layer (DHTMLX + AG-Grid boundaries) | 10, 11, 12 |
 | 9 Editing flow (optimistic, operation-based) | 11, 12, 13 |

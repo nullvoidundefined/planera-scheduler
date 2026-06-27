@@ -1,0 +1,127 @@
+/**
+ * Vocabulary constants for deterministic construction activity naming.
+ * AREAS maps lane index (via modulo) to a building area. PHASE_TASKS provides
+ * task lists for Planning, Procurement, Inspection, and Closeout phases across
+ * all projects. EXECUTION_TASKS provides per-project task lists for the
+ * Execution phase, where work content differs by discipline.
+ */
+
+export const AREAS: readonly string[] = [
+    "Laboratory Wing",
+    "Parking Structure",
+    "Central Lobby",
+    "East Tower",
+    "West Tower",
+    "Loading Dock",
+    "Mechanical Penthouse",
+    "Data Center",
+    "Auditorium",
+    "Cafeteria",
+    "Clean Room Suite",
+    "Server Room",
+    "Atrium",
+    "Service Yard",
+    "Roof Plant",
+    "North Annex",
+    "South Annex",
+    "Utility Plant",
+    "Conference Center",
+    "Pedestrian Bridge",
+    "Basement Levels",
+    "Receiving Bay",
+    "Loading Court",
+    "Rooftop Terrace",
+];
+
+export const EXECUTION_TASKS: Readonly<Record<string, readonly string[]>> = {
+    "Finishing Works": [
+        "Frame partitions",
+        "Hang drywall",
+        "Tape and finish",
+        "Prime surfaces",
+        "Install ceiling grid",
+        "Lay flooring",
+        "Apply finish paint",
+        "Install casework",
+        "Set fixtures and trim",
+        "Final detailing",
+    ],
+    "MEP Installation": [
+        "Rough-in conduit",
+        "Set distribution panels",
+        "Hang ductwork",
+        "Install air handlers",
+        "Run chilled-water piping",
+        "Install plumbing risers",
+        "Pull feeder wire",
+        "Set fire-suppression mains",
+        "Mount light fixtures",
+        "Terminate devices",
+    ],
+    "Site Preparation": [
+        "Clear and grub",
+        "Strip topsoil",
+        "Mass excavation",
+        "Install erosion control",
+        "Lay storm drainage",
+        "Run site utilities",
+        "Compact subgrade",
+        "Place aggregate base",
+        "Rough grade",
+        "Fine grade",
+    ],
+    "Structural Works": [
+        "Excavate footings",
+        "Place mud slab",
+        "Tie footing rebar",
+        "Pour pile caps",
+        "Form foundation walls",
+        "Pour foundation walls",
+        "Erect steel columns",
+        "Set steel beams",
+        "Place metal deck",
+        "Pour slab on deck",
+        "Strip formwork",
+        "Spray fireproofing",
+    ],
+};
+
+export const PHASE_TASKS: Readonly<Record<string, readonly string[]>> = {
+    Closeout: [
+        "Develop punch list",
+        "Resolve punch items",
+        "Final cleaning",
+        "Demobilize crew",
+        "Compile O&M manuals",
+        "Handover documentation",
+        "Owner training",
+    ],
+    Inspection: [
+        "Quality inspection",
+        "Materials testing",
+        "Systems commissioning",
+        "As-built survey",
+        "Code compliance review",
+        "Deficiency walkthrough",
+    ],
+    Planning: [
+        "Site survey",
+        "Geotechnical study",
+        "Schematic design",
+        "Design development",
+        "Coordination review",
+        "Permit application",
+        "Constructability review",
+        "Value engineering study",
+    ],
+    Procurement: [
+        "Issue bid package",
+        "Evaluate proposals",
+        "Award subcontract",
+        "Submit shop drawings",
+        "Approve submittals",
+        "Fabricate assemblies",
+        "Deliver materials",
+        "Stage materials",
+    ],
+};

@@ -1,0 +1,162 @@
+@layer reset, base, tokens, recipes, utilities;
+
+/*
+ * Third-party widget theme overrides for the "drafting table" system. These rules
+ * sit outside the Panda layers (and load after the DHTMLX stylesheet) so they win
+ * the cascade, and they reference only Panda-emitted token CSS variables so no hex
+ * literal lives outside panda.config.ts. They retheme the DHTMLX Gantt grid, bars,
+ * critical chain, milestones, and today marker, and draw the AG-Grid critical-row
+ * left tick, so the critical path reads as one continuous red chain across views.
+ */
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+/* DHTMLX: typography and the paper/panel/grid surfaces. */
+.gantt_container {
+    font-family: var(--fonts-sans);
+    border-color: var(--colors-grid);
+}
+
+.gantt_grid_scale,
+.gantt_task_scale,
+.gantt_scale_cell,
+.gantt_grid_head_cell {
+    background-color: var(--colors-paper);
+    color: var(--colors-graphite);
+    font-family: var(--fonts-mono);
+    border-color: var(--colors-grid);
+}
+
+.gantt_grid_head_cell {
+    font-family: var(--fonts-sans);
+    font-weight: 600;
+}
+
+.gantt_grid_data .gantt_cell {
+    color: var(--colors-graphite);
+    font-family: var(--fonts-mono);
+}
+
+/* The Name tree column stays in IBM Plex Sans; the data columns keep mono. */
+.gantt_grid_data .gantt_cell .gantt_tree_content {
+    font-family: var(--fonts-sans);
+}
+
+/* Non-color critical cue in the grid: the "CP" tag in critical red, so the
+ * signature never relies on hue alone (accessibility). */
+.gantt-critical-tag {
+    color: var(--colors-critical);
+    font-family: var(--fonts-sans);
+    font-weight: 600;
+}
+
+/* DHTMLX GPL registers the layout resizer view with a null create function, so
+ * { resizer: true } in the layout config produces no DOM element. The rules below
+ * are kept for PRO builds. The actual grab target is .gantt-grid-resize-handle,
+ * injected by attachGridResizer.ts after gantt.init(). */
+.gantt_layout_cell.gantt_resizer {
+    cursor: col-resize;
+}
+
+.gantt_layout_cell.gantt_resizer .gantt_layout_content,
+.gantt_resizer_x .gantt_resizer_stick {
+    background-color: var(--colors-grid);
+    cursor: col-resize;
+}
+
+.gantt_layout_cell.gantt_resizer:hover .gantt_layout_content {
+    background-color: var(--colors-float);
+}
+
+/* Custom grid/timeline drag handle: 8 px wide, col-resize cursor, float on hover. */
+.gantt-grid-resize-handle {
+    cursor: col-resize;
+    position: absolute;
+    width: 8px;
+    z-index: 10;
+}
+
+.gantt-grid-resize-handle:hover {
+    background-color: var(--colors-float);
+}
+
+.gantt_task_cell,
+.gantt_task_row,
+.gantt_row,
+.gantt_grid_data .gantt_row {
+    border-color: var(--colors-grid);
+}
+
+/* DHTMLX: non-critical bars in float, the critical chain in critical. */
+.gantt_task_line {
+    background-color: var(--colors-float);
+    border-color: var(--colors-float);
+}
+
+.gantt_task_line .gantt_task_progress {
+    background-color: var(--colors-progress-overlay);
+}
+
+.gantt_task_line.critical {
+    background-color: var(--colors-critical);
+    border-color: var(--colors-critical);
+}
+
+.gantt_task_line.critical .gantt_task_progress {
+    background-color: var(--colors-progress-overlay-critical);
+}
+
+/* Non-critical (float) bars: graphite on float is ~6:1, AA-passing. */
+.gantt_task_line .gantt_task_content {
+    color: var(--colors-ink);
+    font-family: var(--fonts-mono);
+}
+
+/* Critical bars: white on critical-red is ~5.5:1, AA-passing. */
+.gantt_task_line.critical .gantt_task_content {
+    color: var(--colors-panel);
+}
+
+/* DHTMLX: critical dependency links render in critical, completing the chain. */
+.gantt_task_link.critical-link .gantt_line_wrapper > div {
+    background-color: var(--colors-critical);
+}
+
+.gantt_task_link.critical-link .gantt_link_arrow {
+    border-color: var(--colors-critical);
+}
+
+/* DHTMLX: milestones are graphite diamonds (after critical so the diamond holds). */
+.gantt_task_line.gantt_milestone {
+    background-color: var(--colors-graphite);
+    border-color: var(--colors-graphite);
+}
+
+/* DHTMLX: the today marker is the only amber accent. */
+.gantt_marker.today {
+    background-color: var(--colors-hiviz);
+}
+
+.gantt_marker.today .gantt_marker_content {
+    color: var(--colors-graphite);
+    font-family: var(--fonts-mono);
+}
+
+/* AG-Grid: the critical-row left tick, the table half of the red chain. */
+.ag-row.ag-row-critical {
+    box-shadow: inset 3px 0 0 0 var(--colors-critical);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
