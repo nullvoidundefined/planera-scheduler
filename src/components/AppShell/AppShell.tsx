@@ -1,9 +1,10 @@
 /**
  * Top-level application shell. Drives the initial schedule load through
  * useScheduleQuery and renders pending and error states with retry beneath the
- * always-present toolbar. On success it lays out the AG-Grid table and the DHTMLX
- * Gantt side by side in a split pane separated by a keyboard-operable draggable
- * divider, with the table pane width owned by useSplitPaneResize.
+ * always-present toolbar. On success it shows one full-width surface at a time: the
+ * integrated DHTMLX grid-plus-timeline Gantt or the standalone AG-Grid table, chosen
+ * by the toolbar sub-nav. Both stay mounted in a stacked layout; the inactive layer
+ * is visibility-hidden and inert so the costly DHTMLX widget survives every toggle.
  */
 import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 
@@ -11,13 +12,13 @@ import type { JSX } from "react";
 
 import { css } from "../../../styled-system/css";
 import { useScheduleQuery } from "../../api/useScheduleQuery";
+import { SCHEDULE_VIEW_GANTT, SCHEDULE_VIEW_TABLE } from "../../constants/scheduleView";
+import { useScheduleView } from "../../state/useScheduleView";
 import { GanttView } from "../GanttView/GanttView";
 import { TableView } from "../TableView/TableView";
 
-import { Splitter } from "./Splitter";
 import { Toolbar } from "./Toolbar";
-import { appShellRecipe, paneRecipe, splitBodyRecipe } from "./appShell.recipe";
-import { useSplitPaneResize } from "./useSplitPaneResize";
+import { appShellRecipe, viewLayerRecipe, viewStackRecipe } from "./appShell.recipe";
 
 const bodyClass = css({ display: "grid", minHeight: "0", overflow: "hidden" });
 
@@ -49,7 +50,10 @@ const retryButtonClass = css({
 
 export function AppShell(): JSX.Element {
     const { isError, isPending, refetch } = useScheduleQuery();
-    const { containerRef, isDragging, separatorProps, tablePercent } = useSplitPaneResize();
+    const activeView = useScheduleView((state) => state.activeView);
+
+    const isGanttActive = activeView === SCHEDULE_VIEW_GANTT;
+    const isTableActive = activeView === SCHEDULE_VIEW_TABLE;
 
     return (
         <div className={appShellRecipe()}>
@@ -69,17 +73,20 @@ export function AppShell(): JSX.Element {
                     </div>
                 ) : null}
                 {!isPending && !isError ? (
-                    <div
-                        className={splitBodyRecipe()}
-                        ref={containerRef}
-                        style={{ gridTemplateColumns: `${tablePercent}% auto 1fr` }}
-                    >
-                        <div className={paneRecipe({ side: "left" })}>
-                            <TableView />
-                        </div>
-                        <Splitter isDragging={isDragging} separatorProps={separatorProps} />
-                        <div className={paneRecipe({ side: "right" })}>
+                    <div className={viewStackRecipe()}>
+                        <div
+                            aria-hidden={!isGanttActive}
+                            className={viewLayerRecipe({ active: isGanttActive })}
+                            inert={!isGanttActive}
+                        >
                             <GanttView />
+                        </div>
+                        <div
+                            aria-hidden={!isTableActive}
+                            className={viewLayerRecipe({ active: isTableActive })}
+                            inert={!isTableActive}
+                        >
+                            <TableView />
                         </div>
                     </div>
                 ) : null}

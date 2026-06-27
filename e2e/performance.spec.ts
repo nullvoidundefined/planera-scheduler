@@ -9,7 +9,7 @@
  */
 import { expect, test } from "@playwright/test";
 
-import { gotoSchedule, waitForFirstGanttBar, waitForTreegrid } from "./helpers/appReady";
+import { gotoSchedule, waitForFirstGanttBar } from "./helpers/appReady";
 import type { ScheduleStoreWindow } from "./helpers/storeHandle";
 
 // Initial paint of the full dataset (MSW fetch, store bootstrap, global CPM pass,
@@ -41,7 +41,6 @@ const TABLE_ORIGIN = "table";
 test("renders the 5000-activity schedule within the initial-render budget", async ({ page }) => {
     const start = Date.now();
     await gotoSchedule(page);
-    await waitForTreegrid(page);
     await waitForFirstGanttBar(page, MAX_INITIAL_RENDER_MS);
     const renderMs = Date.now() - start;
     console.log(`[perf] initial render: ${renderMs}ms`);
@@ -50,7 +49,6 @@ test("renders the 5000-activity schedule within the initial-render budget", asyn
 
 test("an optimistic duration edit is downstream-bounded and settles fast", async ({ page }) => {
     await gotoSchedule(page);
-    await waitForTreegrid(page);
     await waitForFirstGanttBar(page);
 
     // From the store, measure each task's downstream cone (BFS over the dependency

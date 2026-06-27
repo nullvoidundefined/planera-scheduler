@@ -15,3 +15,17 @@ test("renders Gantt bars for the seeded 5000-activity schedule", async ({ page }
     const barCount = await page.locator(".gantt_task_line").count();
     expect(barCount).toBeGreaterThan(0);
 });
+
+test("renders the integrated native grid with all schedule columns", async ({ page }) => {
+    await gotoSchedule(page);
+    await waitForFirstGanttBar(page, GANTT_RENDER_TIMEOUT_MS);
+    // The DHTMLX grid (left half of the integrated view) carries every schedule
+    // column; assert the header row renders the full ordered set.
+    const headers = page.locator(".gantt_grid_scale .gantt_grid_head_cell");
+    for (const label of ["WBS", "Name", "Duration (d)", "Start", "Finish", "Total Float (d)", "CP"]) {
+        await expect(headers.filter({ hasText: label }).first()).toBeVisible();
+    }
+    // The integrated view renders both halves: the native grid alongside the timeline.
+    await expect(page.locator(".gantt_grid").first()).toBeVisible();
+    await expect(page.locator(".gantt_task").first()).toBeVisible();
+});

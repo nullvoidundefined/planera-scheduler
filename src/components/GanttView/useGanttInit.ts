@@ -1,38 +1,47 @@
 /**
- * DHTMLX Gantt lifecycle hook. Initializes the imperative widget once against a
- * stable container, parses the computed schedule, configures zoom, the today
- * marker, and the critical-path template, and subscribes to the store to
- * batch-update only changed bars. Drag and resize translate to a resizeActivity
- * operation. React never re-renders into the widget's DOM. Zoom and the marker are
- * applied after gantt.init, since DHTMLX's zoom setLevel reaches into the timeline
- * views that only exist once the widget is initialized. Cleanup clears the widget's
- * data with clearAll rather than destructor: dhtmlx-gantt's standard build exposes a
- * single global instance, and destructor would permanently kill it, breaking the
- * re-init that React StrictMode's dev double-mount forces. Updates still flow through
- * batchUpdate, never clearAll + reparse.
+ * DHTMLX Gantt lifecycle hook for the integrated grid-plus-timeline view. Initializes
+ * the imperative widget once against a stable container, configures the native left
+ * grid (all schedule columns, draggable grid/timeline resizer), working-time so the
+ * widget counts duration in working days, zoom, the today marker, and the
+ * critical-path template, then parses the computed schedule and subscribes to the
+ * store to batch-update only changed bars. Drag and resize translate to a
+ * resizeActivity operation; native tree collapse syncs both ways with the store's
+ * collapsed set behind an echo guard so applying the store never re-dispatches.
+ * React never re-renders into the widget's DOM. Cleanup clears the widget's data with
+ * clearAll rather than destructor: dhtmlx-gantt's standard build exposes a single
+ * global instance, and destructor would permanently kill it, breaking the re-init that
+ * React StrictMode's dev double-mount forces. Updates still flow through batchUpdate,
+ * never clearAll + reparse.
  */
 import { gantt } from "dhtmlx-gantt";
 import type { ZoomLevel } from "dhtmlx-gantt";
 import { useEffect } from "react";
 import type { RefObject } from "react";
 
+import { DEFAULT_WORK_WEEK } from "../../constants/calendar";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
 import { GANTT_DEFAULT_ZOOM, GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
 import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
+import { computeSummaries } from "../../services/cpm/computeSummaries";
 import { createCalendar } from "../../services/createCalendar";
 import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
 
+import { GANTT_GRID_COLUMNS } from "./ganttGridColumns";
 import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
 import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
 import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 
 const DAY_SCALE_HEIGHT_PX = 27;
+const DAYS_PER_WEEK = 7;
 const GANTT_BAR_HEIGHT_PX = 18;
 const GANTT_DATE_FORMAT = "%Y-%m-%d %H:%i";
+const GANTT_DURATION_UNIT = "day";
+const GANTT_GRID_WIDTH_PX = 720;
 const GANTT_ROW_HEIGHT_PX = 30;
+const GROUP_ACTIVITY_TYPE = "group";
 const MIN_BAR_DURATION_DAYS = 1;
 const MONTH_COLUMN_WIDTH_PX = 120;
 const MULTI_SCALE_HEIGHT_PX = 50;
@@ -40,6 +49,23 @@ const TODAY_MARKER_CSS = "today";
 const TODAY_MARKER_TEXT = "Today";
 const WEEK_COLUMN_WIDTH_PX = 80;
 const WEEK_SCALE_FORMAT = "Week #%W";
+
+// Draggable resizer between the grid and the timeline (the integrated split the
+// task asks for); keep_grid_width holds the grid width steady while columns resize.
+const GANTT_LAYOUT = {
+    css: "gantt_container",
+    rows: [
+        {
+            cols: [
+                { id: "grid", scrollX: "scrollHor", scrollY: "scrollVer", view: "grid" },
+                { resizer: true, width: 1 },
+                { id: "timeline", scrollX: "scrollHor", scrollY: "scrollVer", view: "timeline" },
+                { id: "scrollVer", scroll: "y", view: "scrollbar" },
+            ],
+        },
+        { height: 20, id: "scrollHor", scroll: "x", view: "scrollbar" },
+    ],
+};
 
 const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
     current: GANTT_DEFAULT_ZOOM,
@@ -71,6 +97,12 @@ const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
     ],
 };
 
+// Guards the collapse feedback loop: applyCollapseToGantt calls gantt.open/close
+// programmatically, which fires onTaskOpened/onTaskClosed. Dispatching for those
+// would flip the shared collapsed set back and oscillate forever, so the handler
+// dispatches only when this flag is clear (a genuine user chevron click).
+let suppressCollapseEcho = false;
+
 export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): void {
     useEffect(() => {
         const container = containerRef.current;
@@ -84,23 +116,28 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
         applyZoomLevels();
         addTodayMarker();
 
-        const { computed, graph } = useScheduleStore.getState();
+        const { collapsed, computed, graph } = useScheduleStore.getState();
         gantt.parse({
             links: toGanttLinks(graph.dependencies),
             tasks: toGanttTasks(graph, computed, calendar),
         });
+        applyCollapseToGantt(collapsed);
         scrollToProjectStart(computed, calendar);
 
         const detachDrag = attachDragHandler();
         const detachSelection = attachSelectionHandler();
+        const detachCollapse = attachCollapseHandlers();
         const unsubscribe = subscribeComputed(calendar);
         const unsubscribeSelection = subscribeSelection();
+        const unsubscribeCollapse = subscribeCollapse();
 
         return () => {
             detachDrag();
             detachSelection();
+            detachCollapse();
             unsubscribe();
             unsubscribeSelection();
+            unsubscribeCollapse();
             gantt.clearAll();
         };
     }, [containerRef]);
@@ -111,6 +148,11 @@ function configureGantt(): void {
     gantt.config.date_format = GANTT_DATE_FORMAT;
     gantt.config.row_height = GANTT_ROW_HEIGHT_PX;
     gantt.config.bar_height = GANTT_BAR_HEIGHT_PX;
+    gantt.config.columns = GANTT_GRID_COLUMNS;
+    gantt.config.layout = GANTT_LAYOUT;
+    gantt.config.grid_width = GANTT_GRID_WIDTH_PX;
+    gantt.config.keep_grid_width = true;
+    applyWorkTime();
     gantt.templates.task_class = (_start, _end, task) =>
         resolveCriticalTaskClass(useScheduleStore.getState().computed.get(String(task.id)));
     gantt.templates.link_class = (link) => {
@@ -120,6 +162,23 @@ function configureGantt(): void {
             computed.get(String(link.target)),
         );
     };
+}
+
+function applyWorkTime(): void {
+    // The CPM engine and the working-day calendar count duration in working days.
+    // work_time makes DHTMLX count the same way, so a drag to N days stores N
+    // working days and dateFromIndex round-trips exactly (no weekend-skew inflation).
+    gantt.config.work_time = true;
+    // skip_off_time hides weekend columns; it is a DHTMLX PRO-only feature and a
+    // no-op in this GPL build. The drag-unit fix does not depend on it; work_time
+    // alone aligns the duration counts. Set to document the intended PRO behavior.
+    gantt.config.skip_off_time = true;
+    gantt.config.duration_unit = GANTT_DURATION_UNIT;
+    for (let day = 0; day < DAYS_PER_WEEK; day++) {
+        if (!DEFAULT_WORK_WEEK.includes(day)) {
+            gantt.setWorkTime({ day, hours: false });
+        }
+    }
 }
 
 function applyZoomLevels(): void {
@@ -168,6 +227,25 @@ function attachSelectionHandler(): () => void {
     return () => gantt.detachEvent(id);
 }
 
+function attachCollapseHandlers(): () => void {
+    const openId = gantt.attachEvent("onTaskOpened", handleCollapseToggle);
+    const closeId = gantt.attachEvent("onTaskClosed", handleCollapseToggle);
+    return () => {
+        gantt.detachEvent(openId);
+        gantt.detachEvent(closeId);
+    };
+}
+
+function handleCollapseToggle(taskId: string | number): boolean {
+    if (!suppressCollapseEcho) {
+        useScheduleStore.getState().dispatchOperation(
+            { kind: "toggleCollapse", rowId: String(taskId) },
+            OPERATION_ORIGIN_GANTT,
+        );
+    }
+    return true;
+}
+
 function subscribeComputed(calendar: ReturnType<typeof createCalendar>): () => void {
     return useScheduleStore.subscribe((state, previous) => {
         if (state.computed === previous.computed) {
@@ -193,25 +271,67 @@ function subscribeSelection(): () => void {
     });
 }
 
+function subscribeCollapse(): () => void {
+    return useScheduleStore.subscribe((state, previous) => {
+        if (state.collapsed === previous.collapsed) {
+            return;
+        }
+        applyCollapseToGantt(state.collapsed);
+    });
+}
+
+function applyCollapseToGantt(collapsed: Set<string>): void {
+    const { graph } = useScheduleStore.getState();
+    suppressCollapseEcho = true;
+    gantt.batchUpdate(() => {
+        for (const activity of graph.activities) {
+            if (activity.type !== GROUP_ACTIVITY_TYPE || !gantt.isTaskExists(activity.id)) {
+                continue;
+            }
+            const shouldCollapse = collapsed.has(activity.id);
+            const isOpen = gantt.getTask(activity.id).$open !== false;
+            if (shouldCollapse && isOpen) {
+                gantt.close(activity.id);
+            } else if (!shouldCollapse && !isOpen) {
+                gantt.open(activity.id);
+            }
+        }
+    });
+    suppressCollapseEcho = false;
+}
+
 function applyComputedToGantt(
     computed: Map<string, ComputedActivity>,
     calendar: ReturnType<typeof createCalendar>,
 ): void {
+    const { graph } = useScheduleStore.getState();
+    const summaries = computeSummaries(graph, computed);
     gantt.batchUpdate(() => {
         for (const [id, entry] of computed) {
-            if (gantt.isTaskExists(id)) {
-                const task = gantt.getTask(id);
-                // Set both endpoints, not duration: DHTMLX renders the bar from
-                // start_date/end_date and recomputes duration from them on update, so
-                // a duration-only assignment is discarded and the bar never resizes.
-                const endIndex = Math.max(
-                    entry.earlyFinish,
-                    entry.earlyStart + MIN_BAR_DURATION_DAYS,
-                );
-                task.start_date = calendar.dateFromIndex(entry.earlyStart);
-                task.end_date = calendar.dateFromIndex(endIndex);
-                gantt.updateTask(id);
+            if (!gantt.isTaskExists(id)) {
+                continue;
             }
+            const task = gantt.getTask(id);
+            // Set both endpoints, not duration: DHTMLX renders the bar from
+            // start_date/end_date and recomputes duration from them on update, so
+            // a duration-only assignment is discarded and the bar never resizes.
+            const endIndex = Math.max(entry.earlyFinish, entry.earlyStart + MIN_BAR_DURATION_DAYS);
+            task.start_date = calendar.dateFromIndex(entry.earlyStart);
+            task.end_date = calendar.dateFromIndex(endIndex);
+            task.totalFloat = entry.totalFloat;
+            task.isCritical = entry.isCritical;
+            gantt.updateTask(id);
+        }
+        // Refresh the rolled-up float and critical cue on group rows; DHTMLX
+        // auto-rolls their span dates and duration from the updated leaves.
+        for (const [id, summary] of summaries) {
+            if (!gantt.isTaskExists(id)) {
+                continue;
+            }
+            const task = gantt.getTask(id);
+            task.totalFloat = summary.totalFloat;
+            task.isCritical = summary.isCritical;
+            gantt.updateTask(id);
         }
     });
 }

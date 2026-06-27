@@ -3,22 +3,27 @@
  * Group activities become DHTMLX "project" rows positioned by the rolled-up
  * summary; tasks and milestones become their respective row types positioned by
  * the computed early start. Dates are derived from working-day indices through
- * the calendar, never read from stored fields.
+ * the calendar, never read from stored fields. Each row also carries the custom
+ * wbs, totalFloat, and isCritical properties the native grid columns render.
  */
 import { computeSummaries } from "../../services/cpm/computeSummaries";
 import type { Calendar } from "../../types/calendar";
 import type { Activity, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
+const MIN_BAR_DURATION_DAYS = 1;
 const ROOT_PARENT = "0";
 
 export interface GanttTask {
     duration: number;
     id: string;
+    isCritical: boolean;
     open: boolean;
     parent: string;
     start_date: Date;
     text: string;
+    totalFloat: number;
     type: string;
+    wbs: string;
 }
 
 export function toGanttTasks(
@@ -28,32 +33,36 @@ export function toGanttTasks(
 ): GanttTask[] {
     const summaries = computeSummaries(graph, computed);
     return graph.activities.map((activity) =>
-        toGanttTask(activity, resolveBounds(activity, computed, summaries), calendar),
+        toGanttTask(activity, resolveComputed(activity, computed, summaries), calendar),
     );
 }
 
-function resolveBounds(
+function resolveComputed(
     activity: Activity,
     computed: Map<string, ComputedActivity>,
     summaries: Map<string, ComputedActivity>,
-): { earlyFinish: number; earlyStart: number } {
-    const bounds = activity.type === "group" ? summaries.get(activity.id) : computed.get(activity.id);
-    return { earlyFinish: bounds?.earlyFinish ?? 0, earlyStart: bounds?.earlyStart ?? 0 };
+): ComputedActivity | undefined {
+    return activity.type === "group" ? summaries.get(activity.id) : computed.get(activity.id);
 }
 
 function toGanttTask(
     activity: Activity,
-    bounds: { earlyFinish: number; earlyStart: number },
+    entry: ComputedActivity | undefined,
     calendar: Calendar,
 ): GanttTask {
+    const earlyFinish = entry?.earlyFinish ?? 0;
+    const earlyStart = entry?.earlyStart ?? 0;
     return {
-        duration: Math.max(bounds.earlyFinish - bounds.earlyStart, activity.type === "milestone" ? 0 : 1),
+        duration: Math.max(earlyFinish - earlyStart, activity.type === "milestone" ? 0 : MIN_BAR_DURATION_DAYS),
         id: activity.id,
+        isCritical: entry?.isCritical ?? false,
         open: true,
         parent: activity.parentId ?? ROOT_PARENT,
-        start_date: calendar.dateFromIndex(bounds.earlyStart),
+        start_date: calendar.dateFromIndex(earlyStart),
         text: activity.name,
+        totalFloat: entry?.totalFloat ?? 0,
         type: toGanttTaskType(activity.type),
+        wbs: activity.wbs,
     };
 }
 

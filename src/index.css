@@ -41,6 +41,25 @@ body,
     font-family: var(--fonts-mono);
 }
 
+/* The Name tree column stays in IBM Plex Sans; the data columns keep mono. */
+.gantt_grid_data .gantt_cell .gantt_tree_content {
+    font-family: var(--fonts-sans);
+}
+
+/* Non-color critical cue in the grid: the "CP" tag in critical red, so the
+ * signature never relies on hue alone (accessibility). */
+.gantt-critical-tag {
+    color: var(--colors-critical);
+    font-family: var(--fonts-sans);
+    font-weight: 600;
+}
+
+/* The draggable grid/timeline divider in grid color, matching the drafting grid. */
+.gantt_layout_cell.gantt_resizer .gantt_layout_content,
+.gantt_resizer_x .gantt_resizer_stick {
+    background-color: var(--colors-grid);
+}
+
 .gantt_task_cell,
 .gantt_task_row,
 .gantt_row,

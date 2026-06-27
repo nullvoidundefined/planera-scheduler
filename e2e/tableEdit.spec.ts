@@ -7,7 +7,7 @@
  */
 import { expect, test } from "@playwright/test";
 
-import { GRID_READY_TIMEOUT_MS, gotoSchedule, waitForTreegrid } from "./helpers/appReady";
+import { GRID_READY_TIMEOUT_MS, gotoSchedule, showTableView } from "./helpers/appReady";
 
 // AG-Grid tree-data: group rows carry class "ag-row-group"; leaf rows do not.
 // The editor input in AG-Grid v33 is rendered inside .ag-cell-editor as an
@@ -20,8 +20,8 @@ test("duration cell opens an editable input on double-click (editor module regis
 }) => {
     await gotoSchedule(page);
 
-    // Wait for the treegrid to render with data rows.
-    await waitForTreegrid(page);
+    // Switch to the standalone table surface and wait for its data rows.
+    await showTableView(page);
     await expect(page.locator(".ag-row").first()).toBeVisible({ timeout: GRID_READY_TIMEOUT_MS });
 
     // Target the first LEAF row's duration cell (group rows are not editable).
@@ -52,7 +52,7 @@ test("typing a new duration value and pressing Enter updates the displayed cell"
 
     await gotoSchedule(page);
 
-    await waitForTreegrid(page);
+    await showTableView(page);
     await expect(page.locator(".ag-row").first()).toBeVisible({ timeout: GRID_READY_TIMEOUT_MS });
 
     // Capture the first leaf row's row-id so we can locate it stably after the

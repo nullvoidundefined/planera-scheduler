@@ -14,12 +14,15 @@ import {
     GRID_READY_TIMEOUT_MS,
     gotoSchedule,
     LOAD_TIMEOUT_MS,
+    showTableView,
     waitForFirstGanttBar,
-    waitForTreegrid,
 } from "./helpers/appReady";
 import type { ScheduleStoreWindow } from "./helpers/storeHandle";
 
 const NEW_DURATION_DAYS = 60;
+// A concrete length for the work-time round-trip check: a drag to N working days
+// must reconcile to N, not an inflated calendar-day count.
+const RECONCILE_DURATION_DAYS = 18;
 // Lengthening a near-root activity recomputes a downstream cone of thousands of
 // leaves on the main thread, then an async worker pass; under Playwright's parallel
 // browser load on the full dataset this needs real headroom, not a masked race.
@@ -34,13 +37,21 @@ const EDIT_TEST_TIMEOUT_MS =
     LOAD_TIMEOUT_MS + GRID_READY_TIMEOUT_MS + 2 * PROPAGATION_TIMEOUT_MS + 10000;
 const SETTLE_MS = 800;
 
+// dhtmlx-gantt assigns its singleton to window.gantt; specs read the widget's own
+// task model to prove the rendered duration matches the engine's working days.
+interface GanttWindow {
+    gantt?: {
+        getTask(id: string): { duration: number };
+        isTaskExists(id: string): boolean;
+    };
+}
+
 test.describe("two-way editing", () => {
     test("a duration edit resizes the matching Gantt bar and shifts downstream dates", async ({
         page,
     }) => {
         test.setTimeout(EDIT_TEST_TIMEOUT_MS);
         await gotoSchedule(page);
-        await waitForTreegrid(page);
         await waitForFirstGanttBar(page);
 
         // Pick, from the store, the first task leaf whose successor depends on it
@@ -128,10 +139,56 @@ test.describe("two-way editing", () => {
             .toBeGreaterThan(target!.successorEarlyStartBefore!);
     });
 
+    test("a resize to N working days reconciles to N in the Gantt (work-time aligned)", async ({
+        page,
+    }) => {
+        test.setTimeout(EDIT_TEST_TIMEOUT_MS);
+        await gotoSchedule(page);
+        await waitForFirstGanttBar(page);
+
+        // Pick any leaf task. Its early finish equals its early start plus its own
+        // duration, so the DHTMLX bar's work-time duration must equal the dispatched
+        // working-day count exactly. Before the fix, DHTMLX counted calendar days and
+        // a drag to 18 reconciled to ~28; with work_time the count round-trips 1:1.
+        const activityId = await page.evaluate(() => {
+            const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
+            if (store === undefined) {
+                return null;
+            }
+            const leaf = store
+                .getState()
+                .graph.activities.find((a) => a.type === "task" && a.durationDays > 0);
+            return leaf?.id ?? null;
+        });
+        expect(activityId).not.toBeNull();
+
+        await page.evaluate(
+            ({ durationDays, id }) => {
+                const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;
+                store
+                    ?.getState()
+                    .dispatchOperation({ activityId: id, durationDays, kind: "resizeActivity" }, "table");
+            },
+            { durationDays: RECONCILE_DURATION_DAYS, id: activityId! },
+        );
+
+        // The widget's own duration for the edited bar settles to exactly N working
+        // days; no weekend-skew inflation.
+        await expect
+            .poll(
+                async () =>
+                    page.evaluate((id) => {
+                        const widget = (window as unknown as GanttWindow).gantt;
+                        return widget?.isTaskExists(id) ? widget.getTask(id).duration : null;
+                    }, activityId!),
+                { timeout: PROPAGATION_TIMEOUT_MS },
+            )
+            .toBe(RECONCILE_DURATION_DAYS);
+    });
+
     test("a gantt-origin edit reflows the recomputed schedule into the Gantt", async ({ page }) => {
         test.setTimeout(EDIT_TEST_TIMEOUT_MS);
         await gotoSchedule(page);
-        await waitForTreegrid(page);
         await waitForFirstGanttBar(page);
 
         // Same sole-successor selection as the table-origin case: a successor tied to a
@@ -226,7 +283,8 @@ test.describe("two-way editing", () => {
 
     test("collapsing a phase propagates to the grid and does not oscillate", async ({ page }) => {
         await gotoSchedule(page);
-        await waitForTreegrid(page);
+        // The grid-visible proof needs the standalone table surface active.
+        await showTableView(page);
         await expect(page.locator(".ag-row").first()).toBeVisible({
             timeout: GRID_READY_TIMEOUT_MS,
         });
@@ -279,7 +337,7 @@ test.describe("two-way editing", () => {
 
     test("a cycle-creating edit is rejected and the graph is unchanged", async ({ page }) => {
         await gotoSchedule(page);
-        await waitForTreegrid(page);
+        await waitForFirstGanttBar(page);
 
         const outcome = await page.evaluate(() => {
             const store = (window as unknown as ScheduleStoreWindow).__scheduleStore;

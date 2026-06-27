@@ -8,6 +8,8 @@
 import { computeSummaries } from "../../services/cpm/computeSummaries";
 import type { Activity, ActivityType, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
+const GROUP_ACTIVITY_TYPE = "group";
+
 export interface TableRow {
     critical: boolean;
     duration: number;
@@ -47,7 +49,7 @@ function toTableRow(
 ): TableRow {
     return {
         critical: computedActivity?.isCritical ?? false,
-        duration: activity.durationDays,
+        duration: resolveDuration(activity, computedActivity),
         earlyFinish: computedActivity?.earlyFinish ?? 0,
         earlyStart: computedActivity?.earlyStart ?? 0,
         id: activity.id,
@@ -57,6 +59,17 @@ function toTableRow(
         type: activity.type,
         wbs: activity.wbs,
     };
+}
+
+// Group rows show their rolled-up span (summary finish minus start), never the
+// stored durationDays, which is 0 for a group. Leaf rows keep their own duration.
+function resolveDuration(activity: Activity, computedActivity: ComputedActivity | undefined): number {
+    if (activity.type === GROUP_ACTIVITY_TYPE) {
+        return computedActivity === undefined
+            ? 0
+            : computedActivity.earlyFinish - computedActivity.earlyStart;
+    }
+    return activity.durationDays;
 }
 
 function buildAncestryPath(activity: Activity, activitiesById: Map<string, Activity>): string[] {

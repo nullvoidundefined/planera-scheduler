@@ -51,4 +51,17 @@ describe("toGanttTasks", () => {
         const tasks = toGanttTasks(GRAPH, COMPUTED, createCalendar());
         expect(tasks.find((row) => row.id === "m")?.type).toBe("milestone");
     });
+
+    test("carries wbs, total float, and critical flag for the native grid columns", () => {
+        const taskRow = toGanttTasks(GRAPH, COMPUTED, createCalendar()).find((row) => row.id === "a");
+        expect(taskRow?.wbs).toBe("1.1");
+        expect(taskRow?.totalFloat).toBe(0);
+        expect(taskRow?.isCritical).toBe(false);
+    });
+
+    test("group row duration is the rolled-up span, not the stored zero", () => {
+        const groupRow = toGanttTasks(GRAPH, COMPUTED, createCalendar()).find((row) => row.id === "ph");
+        // The phase spans a (0-5) and m (5), so the rolled-up duration is 5 working days.
+        expect(groupRow?.duration).toBe(5);
+    });
 });

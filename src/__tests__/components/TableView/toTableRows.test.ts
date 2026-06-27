@@ -47,4 +47,12 @@ describe("toTableRows", () => {
         expect(group?.earlyFinish).toBe(5);
         expect(group?.critical).toBe(true);
     });
+
+    test("group duration is the rolled-up span, not the stored zero", () => {
+        const rows = toTableRows(GRAPH, COMPUTED);
+        // The stored durationDays on both groups is 0; the displayed duration must be
+        // the descendant span (finish - start), here 5 working days.
+        expect(rows.find((row) => row.id === "p")?.duration).toBe(5);
+        expect(rows.find((row) => row.id === "ph")?.duration).toBe(5);
+    });
 });

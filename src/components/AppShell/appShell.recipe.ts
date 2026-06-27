@@ -1,8 +1,10 @@
 /**
  * PandaCSS recipes for the application shell layout: the full-viewport grid that
- * stacks the toolbar over the body, the split-body grid that hosts the table and
- * Gantt panes, and the pane wrapper itself. Visual values resolve to the drafting
- * table semantic tokens defined in panda.config.ts.
+ * stacks the toolbar over the body, the view stack that fills the body, and the two
+ * absolutely-positioned view layers (the integrated Gantt and the standalone table)
+ * that occupy the same area. Only the active layer is visible; the inactive one stays
+ * mounted and full-size via visibility:hidden so the expensive DHTMLX widget is never
+ * re-initialized on a toggle. Visual values resolve to the drafting-table tokens.
  */
 import { cva } from "../../../styled-system/css";
 
@@ -20,28 +22,28 @@ export const appShellRecipe = cva({
     },
 });
 
-export const splitBodyRecipe = cva({
+export const viewStackRecipe = cva({
     base: {
         bg: "canvas",
-        display: "grid",
-        gap: "0",
         minHeight: "0",
-        overflow: "hidden",
-    },
-});
-
-export const paneRecipe = cva({
-    base: {
-        bg: "surface",
-        minHeight: "0",
-        minWidth: "0",
         overflow: "hidden",
         position: "relative",
     },
+});
+
+export const viewLayerRecipe = cva({
+    base: {
+        bg: "surface",
+        inset: "0",
+        minHeight: "0",
+        minWidth: "0",
+        overflow: "hidden",
+        position: "absolute",
+    },
     variants: {
-        side: {
-            left: { borderRight: "1px solid token(colors.borderHairline)" },
-            right: { borderLeft: "1px solid token(colors.borderHairline)" },
+        active: {
+            false: { visibility: "hidden" },
+            true: { visibility: "visible" },
         },
     },
 });
