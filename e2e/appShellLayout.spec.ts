@@ -16,11 +16,11 @@ test("renders the toolbar and the integrated Gantt by default", async ({ page })
         timeout: LOAD_TIMEOUT_MS,
     });
     // The Gantt/Table sub-nav exposes both surfaces; Gantt is selected on load.
-    await expect(page.getByRole("button", { name: "Gantt", exact: true })).toHaveAttribute(
+    await expect(page.getByRole("button", { exact: true, name: "Gantt" })).toHaveAttribute(
         "aria-pressed",
         "true",
     );
-    await expect(page.getByRole("button", { name: "Table", exact: true })).toHaveAttribute(
+    await expect(page.getByRole("button", { exact: true, name: "Table" })).toHaveAttribute(
         "aria-pressed",
         "false",
     );
@@ -37,7 +37,7 @@ test("the sub-nav switches to the standalone table and hides the Gantt controls"
     await showTableView(page);
 
     // Table is now active; the Gantt-only zoom toolbar is gone from the chrome.
-    await expect(page.getByRole("button", { name: "Table", exact: true })).toHaveAttribute(
+    await expect(page.getByRole("button", { exact: true, name: "Table" })).toHaveAttribute(
         "aria-pressed",
         "true",
     );

@@ -40,6 +40,6 @@ export async function waitForTreegrid(page: Page): Promise<void> {
 // treegrid to be visible. Table specs call this after gotoSchedule because the
 // Gantt is the default surface and the table starts hidden behind the sub-nav.
 export async function showTableView(page: Page): Promise<void> {
-    await page.getByRole("button", { name: TABLE_VIEW_BUTTON_NAME, exact: true }).click();
+    await page.getByRole("button", { exact: true, name: TABLE_VIEW_BUTTON_NAME }).click();
     await waitForTreegrid(page);
 }
