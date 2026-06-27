@@ -18,5 +18,12 @@ export default tseslint.config(
             ],
         },
     },
+    {
+        files: ["**/*.cjs"],
+        languageOptions: {
+            globals: { module: "readonly", require: "readonly" },
+            sourceType: "commonjs",
+        },
+    },
     { ignores: ["dist/**", "node_modules/**", "coverage/**", "styled-system/**"] },
 );

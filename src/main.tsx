@@ -1,6 +1,6 @@
 /**
  * Application entry point: starts the MSW worker that serves the generated schedule and mounts
- * AppShell. This is a backend-less demo, so MSW runs in production too (the service worker
+ * the routed App. This is a backend-less demo, so MSW runs in production too (the service worker
  * intercepts the schedule fetch). The store handle is exposed on window only in development, for
  * the E2E suite.
  */
@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { AppShell } from "./components/AppShell/AppShell";
+import { App } from "./App";
 import "./index.css";
 
 async function startApp(): Promise<void> {
@@ -37,7 +37,7 @@ async function startApp(): Promise<void> {
     createRoot(rootElement).render(
         <StrictMode>
             <QueryClientProvider client={queryClient}>
-                <AppShell />
+                <App />
             </QueryClientProvider>
         </StrictMode>,
     );
