@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { AREAS } from "../../constants/activityNaming";
 import { LANE_LENGTH } from "../../constants/generator";
 import { computeSchedule } from "../../services/cpm/computeSchedule";
 import { detectCycle } from "../../services/cpm/detectCycle";
@@ -224,6 +225,27 @@ describe("generateSchedule", () => {
         expect(span).toBeLessThanOrEqual(MAX_SPAN_DAYS);
         expect(criticalFraction).toBeGreaterThanOrEqual(MIN_CRITICAL_FRACTION);
         expect(criticalFraction).toBeLessThanOrEqual(MAX_CRITICAL_FRACTION);
+    });
+
+    test("leaf names are coherent construction task names, not the old Activity-N pattern", () => {
+        const graph = generateSchedule({ activityCount: 200, seed: 1 });
+        const leaves = graph.activities.filter((activity) => activity.type !== "group");
+        const areaSet = new Set(AREAS);
+        for (const leaf of leaves) {
+            expect(leaf.name).not.toMatch(/^Activity \d+$/);
+            const containsArea = AREAS.some((area) => leaf.name.includes(area));
+            expect(containsArea).toBe(true);
+            const area = AREAS.find((a) => leaf.name.includes(a));
+            expect(areaSet.has(area!)).toBe(true);
+        }
+    });
+
+    test("leaf names are deterministic across two calls with the same seed", () => {
+        const graphA = generateSchedule({ activityCount: 100, seed: 42 });
+        const graphB = generateSchedule({ activityCount: 100, seed: 42 });
+        const leavesA = graphA.activities.filter((a) => a.type !== "group").map((a) => a.name);
+        const leavesB = graphB.activities.filter((a) => a.type !== "group").map((a) => a.name);
+        expect(leavesA).toEqual(leavesB);
     });
 
     test("every dependency id is unique", () => {

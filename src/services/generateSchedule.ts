@@ -27,6 +27,8 @@ import {
 } from "../constants/generator";
 import type { Activity, ActivityType, Dependency, ScheduleGraph } from "../types/schedule";
 
+import { buildActivityName } from "./buildActivityName";
+
 interface PhaseSegment {
     endIndex: number;
     parentId: string;
@@ -113,12 +115,19 @@ function buildLeafActivities(
 
         const projectIndex = Math.floor(phaseIndex / GROUPS_PER_PROJECT);
         const phaseOrdinal = phaseIndex % GROUPS_PER_PROJECT;
+        const laneIndex = Math.floor(position / LANE_LENGTH);
+        const positionInLane = position % LANE_LENGTH;
         const isMilestone = rand() < MILESTONE_CHANCE;
 
         leaves.push({
             durationDays: isMilestone ? 0 : 1 + Math.floor(rand() * MAX_DURATION_DAYS),
             id: buildActivityId(index),
-            name: `Activity ${index + 1}`,
+            name: buildActivityName(
+                PROJECT_NAMES[projectIndex],
+                PHASE_NAMES[phaseOrdinal],
+                laneIndex,
+                positionInLane,
+            ),
             parentId: phase.id,
             type: isMilestone ? "milestone" : "task",
             wbs: buildWbs(projectIndex, phaseOrdinal, position),
