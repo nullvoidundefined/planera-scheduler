@@ -18,6 +18,8 @@
         "e2e": "playwright test"
     },
     "dependencies": {
+        "@fontsource/ibm-plex-mono": "^5.2.7",
+        "@fontsource/ibm-plex-sans": "^5.2.8",
         "@tanstack/react-query": "^5.101.1",
         "ag-grid-community": "^33.3.2",
         "ag-grid-enterprise": "^33.3.2",
@@ -49,5 +51,9 @@
         "vite": "^8.1.0",
         "vitest": "^4.1.9"
     },
-    "msw": { "workerDirectory": ["public"] }
+    "msw": {
+        "workerDirectory": [
+            "public"
+        ]
+    }
 }

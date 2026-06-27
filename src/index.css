@@ -1,1 +1,112 @@
 @layer reset, base, tokens, recipes, utilities;
+
+/*
+ * Third-party widget theme overrides for the "drafting table" system. These rules
+ * sit outside the Panda layers (and load after the DHTMLX stylesheet) so they win
+ * the cascade, and they reference only Panda-emitted token CSS variables so no hex
+ * literal lives outside panda.config.ts. They retheme the DHTMLX Gantt grid, bars,
+ * critical chain, milestones, and today marker, and draw the AG-Grid critical-row
+ * left tick, so the critical path reads as one continuous red chain across views.
+ */
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+/* DHTMLX: typography and the paper/panel/grid surfaces. */
+.gantt_container {
+    font-family: var(--fonts-sans);
+    border-color: var(--colors-grid);
+}
+
+.gantt_grid_scale,
+.gantt_task_scale,
+.gantt_scale_cell,
+.gantt_grid_head_cell {
+    background-color: var(--colors-paper);
+    color: var(--colors-graphite);
+    font-family: var(--fonts-mono);
+    border-color: var(--colors-grid);
+}
+
+.gantt_grid_head_cell {
+    font-family: var(--fonts-sans);
+    font-weight: 600;
+}
+
+.gantt_grid_data .gantt_cell {
+    color: var(--colors-graphite);
+}
+
+.gantt_task_cell,
+.gantt_task_row,
+.gantt_row,
+.gantt_grid_data .gantt_row {
+    border-color: var(--colors-grid);
+}
+
+/* DHTMLX: non-critical bars in float, the critical chain in critical. */
+.gantt_task_line {
+    background-color: var(--colors-float);
+    border-color: var(--colors-float);
+}
+
+.gantt_task_line .gantt_task_progress {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+.gantt_task_line.critical {
+    background-color: var(--colors-critical);
+    border-color: var(--colors-critical);
+}
+
+.gantt_task_line.critical .gantt_task_progress {
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+.gantt_task_line .gantt_task_content {
+    color: var(--colors-panel);
+    font-family: var(--fonts-mono);
+}
+
+/* DHTMLX: critical dependency links render in critical, completing the chain. */
+.gantt_task_link.critical-link .gantt_line_wrapper > div {
+    background-color: var(--colors-critical);
+}
+
+.gantt_task_link.critical-link .gantt_link_arrow {
+    border-color: var(--colors-critical);
+}
+
+/* DHTMLX: milestones are graphite diamonds (after critical so the diamond holds). */
+.gantt_task_line.gantt_milestone {
+    background-color: var(--colors-graphite);
+    border-color: var(--colors-graphite);
+}
+
+/* DHTMLX: the today marker is the only amber accent. */
+.gantt_marker.today {
+    background-color: var(--colors-hiviz);
+}
+
+.gantt_marker.today .gantt_marker_content {
+    color: var(--colors-graphite);
+    font-family: var(--fonts-mono);
+}
+
+/* AG-Grid: the critical-row left tick, the table half of the red chain. */
+.ag-row.ag-row-critical {
+    box-shadow: inset 3px 0 0 0 var(--colors-critical);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}

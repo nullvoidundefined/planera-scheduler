@@ -16,10 +16,12 @@ import type { ZoomLevel } from "dhtmlx-gantt";
 import { useEffect } from "react";
 import type { RefObject } from "react";
 
+import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
 import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
 import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
+import { GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
 import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { useScheduleStore } from "../../state/scheduleStore";
@@ -27,43 +29,42 @@ import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
 
 const DAY_SCALE_HEIGHT_PX = 27;
-const DAY_ZOOM_LEVEL = "day";
+const GANTT_BAR_HEIGHT_PX = 18;
 const GANTT_DATE_FORMAT = "%Y-%m-%d %H:%i";
+const GANTT_ROW_HEIGHT_PX = 30;
 const MIN_BAR_DURATION_DAYS = 1;
 const MONTH_COLUMN_WIDTH_PX = 120;
-const MONTH_ZOOM_LEVEL = "month";
 const MULTI_SCALE_HEIGHT_PX = 50;
 const TODAY_MARKER_CSS = "today";
 const TODAY_MARKER_TEXT = "Today";
 const WEEK_COLUMN_WIDTH_PX = 80;
 const WEEK_SCALE_FORMAT = "Week #%W";
-const WEEK_ZOOM_LEVEL = "week";
 
 const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
-    current: DAY_ZOOM_LEVEL,
+    current: GANTT_ZOOM_DAY,
     levels: [
         {
             min_column_width: DEFAULT_DAY_WIDTH_PX,
-            name: DAY_ZOOM_LEVEL,
+            name: GANTT_ZOOM_DAY,
             scale_height: DAY_SCALE_HEIGHT_PX,
-            scales: [{ format: "%d %M", step: 1, unit: DAY_ZOOM_LEVEL }],
+            scales: [{ format: "%d %M", step: 1, unit: GANTT_ZOOM_DAY }],
         },
         {
             min_column_width: WEEK_COLUMN_WIDTH_PX,
-            name: WEEK_ZOOM_LEVEL,
+            name: GANTT_ZOOM_WEEK,
             scale_height: MULTI_SCALE_HEIGHT_PX,
             scales: [
-                { format: WEEK_SCALE_FORMAT, step: 1, unit: WEEK_ZOOM_LEVEL },
-                { format: "%D", step: 1, unit: DAY_ZOOM_LEVEL },
+                { format: WEEK_SCALE_FORMAT, step: 1, unit: GANTT_ZOOM_WEEK },
+                { format: "%D", step: 1, unit: GANTT_ZOOM_DAY },
             ],
         },
         {
             min_column_width: MONTH_COLUMN_WIDTH_PX,
-            name: MONTH_ZOOM_LEVEL,
+            name: GANTT_ZOOM_MONTH,
             scale_height: MULTI_SCALE_HEIGHT_PX,
             scales: [
-                { format: "%F, %Y", step: 1, unit: MONTH_ZOOM_LEVEL },
-                { format: WEEK_SCALE_FORMAT, step: 1, unit: WEEK_ZOOM_LEVEL },
+                { format: "%F, %Y", step: 1, unit: GANTT_ZOOM_MONTH },
+                { format: WEEK_SCALE_FORMAT, step: 1, unit: GANTT_ZOOM_WEEK },
             ],
         },
     ],
@@ -106,13 +107,22 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
 function configureGantt(): void {
     gantt.plugins({ marker: true });
     gantt.config.date_format = GANTT_DATE_FORMAT;
+    gantt.config.row_height = GANTT_ROW_HEIGHT_PX;
+    gantt.config.bar_height = GANTT_BAR_HEIGHT_PX;
     gantt.templates.task_class = (_start, _end, task) =>
         resolveCriticalTaskClass(useScheduleStore.getState().computed.get(String(task.id)));
+    gantt.templates.link_class = (link) => {
+        const { computed } = useScheduleStore.getState();
+        return resolveCriticalLinkClass(
+            computed.get(String(link.source)),
+            computed.get(String(link.target)),
+        );
+    };
 }
 
 function applyZoomLevels(): void {
     gantt.ext.zoom.init(ZOOM_LEVELS);
-    gantt.ext.zoom.setLevel(DAY_ZOOM_LEVEL);
+    gantt.ext.zoom.setLevel(GANTT_ZOOM_DAY);
 }
 
 function addTodayMarker(): void {
