@@ -19,15 +19,16 @@ import { AgGridReact } from "ag-grid-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { JSX } from "react";
 
-import { registerGridModules } from "./registerGridModules";
 import { css } from "../../../styled-system/css";
-import type { TableRow } from "./toTableRows";
-import { toTableRows } from "./toTableRows";
 import { OPERATION_ORIGIN_TABLE } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { formatScheduleDate } from "../../services/formatScheduleDate";
 import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleSelection } from "../../state/useScheduleSelection";
+
+import { registerGridModules } from "./registerGridModules";
+import type { TableRow } from "./toTableRows";
+import { toTableRows } from "./toTableRows";
 
 registerGridModules();
 

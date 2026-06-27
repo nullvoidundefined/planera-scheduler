@@ -9,14 +9,15 @@ import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 
 import type { JSX } from "react";
 
-import { appShellRecipe, paneRecipe, splitBodyRecipe } from "./appShell.recipe";
-import { Splitter } from "./Splitter";
-import { Toolbar } from "./Toolbar";
-import { useSplitPaneResize } from "./useSplitPaneResize";
 import { css } from "../../../styled-system/css";
+import { useScheduleQuery } from "../../api/useScheduleQuery";
 import { GanttView } from "../GanttView/GanttView";
 import { TableView } from "../TableView/TableView";
-import { useScheduleQuery } from "../../api/useScheduleQuery";
+
+import { Splitter } from "./Splitter";
+import { Toolbar } from "./Toolbar";
+import { appShellRecipe, paneRecipe, splitBodyRecipe } from "./appShell.recipe";
+import { useSplitPaneResize } from "./useSplitPaneResize";
 
 const bodyClass = css({ display: "grid", minHeight: "0", overflow: "hidden" });
 

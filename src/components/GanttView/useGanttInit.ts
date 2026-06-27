@@ -16,10 +16,6 @@ import type { ZoomLevel } from "dhtmlx-gantt";
 import { useEffect } from "react";
 import type { RefObject } from "react";
 
-import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
-import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
-import { toGanttLinks } from "./toGanttLinks";
-import { toGanttTasks } from "./toGanttTasks";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
 import { GANTT_DEFAULT_ZOOM, GANTT_ZOOM_DAY, GANTT_ZOOM_MONTH, GANTT_ZOOM_WEEK } from "../../constants/ganttZoom";
 import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
@@ -27,6 +23,11 @@ import { createCalendar } from "../../services/createCalendar";
 import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
+
+import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
+import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
+import { toGanttLinks } from "./toGanttLinks";
+import { toGanttTasks } from "./toGanttTasks";
 
 const DAY_SCALE_HEIGHT_PX = 27;
 const GANTT_BAR_HEIGHT_PX = 18;

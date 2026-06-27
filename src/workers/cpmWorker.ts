@@ -7,9 +7,10 @@
  * authoritative cache and passes it on every request. The store falls back to a
  * synchronous handleWorkerMessage call when this worker fails to initialize.
  */
-import { handleWorkerMessage } from "./handleWorkerMessage";
 import type { Operation } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
+
+import { handleWorkerMessage } from "./handleWorkerMessage";
 
 export interface CpmWorkerRequest {
     graph: ScheduleGraph;

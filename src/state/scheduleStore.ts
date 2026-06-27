@@ -16,21 +16,21 @@ import { create } from "zustand";
 import { computeConeEarlyDates } from "../services/cpm/computeConeEarlyDates";
 import { detectCycle } from "../services/cpm/detectCycle";
 import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
-import { createCpmWorker } from "../workers/createCpmWorker";
-import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 import type { Operation, OperationOrigin } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
 import type { CpmWorkerRequest } from "../workers/cpmWorker";
+import { createCpmWorker } from "../workers/createCpmWorker";
+import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
+    graph: ScheduleGraph;
+    lastOperationOrigin: OperationOrigin | null;
     dispatchOperation(
         operation: Operation,
         origin?: OperationOrigin,
     ): { ok: true } | { cycle: string[]; ok: false };
-    graph: ScheduleGraph;
-    lastOperationOrigin: OperationOrigin | null;
     loadGraph(graph: ScheduleGraph): void;
     reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void;
 }

@@ -10,7 +10,7 @@
  */
 import type { ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
 
-import { earlyStartFromDependency } from "./computeSchedule";
+import { earlyStartFromDependency } from "./earlyStartFromDependency";
 import { selectDownstreamCone } from "./selectDownstreamCone";
 import { sortActivitiesTopologically } from "./sortActivitiesTopologically";
 

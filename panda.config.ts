@@ -8,13 +8,31 @@
 import { defineConfig } from "@pandacss/dev";
 
 export default defineConfig({
-    preflight: true,
-    include: ["./src/**/*.{ts,tsx}"],
     exclude: [],
-    outdir: "styled-system",
+    include: ["./src/**/*.{ts,tsx}"],
     jsxFramework: "react",
+    outdir: "styled-system",
+    preflight: true,
     theme: {
         extend: {
+            semanticTokens: {
+                colors: {
+                    borderHairline: { value: { _dark: "#2A3036", base: "{colors.grid}" } },
+                    canvas: { value: { _dark: "#0E1114", base: "{colors.paper}" } },
+                    controlBorder: { value: "rgba(255, 255, 255, 0.45)" },
+                    controlHover: { value: "rgba(255, 255, 255, 0.12)" },
+                    ink: { value: { _dark: "#EDEFF1", base: "{colors.graphite}" } },
+                    inkMuted: { value: { _dark: "#9AA4AF", base: "{colors.slate}" } },
+                    inkOnPrimary: { value: { _dark: "#0E1114", base: "{colors.panel}" } },
+                    primary: { value: { _dark: "#4E7CB0", base: "{colors.steel}" } },
+                    primaryHover: { value: { _dark: "#3D6695", base: "{colors.steelHover}" } },
+                    progressOverlay: { value: "rgba(0, 0, 0, 0.12)" },
+                    progressOverlayCritical: { value: "rgba(0, 0, 0, 0.18)" },
+                    scrimOnPrimary: { value: "rgba(0, 0, 0, 0.18)" },
+                    selectionBg: { value: { _dark: "#1C3A57", base: "{colors.steelTint}" } },
+                    surface: { value: { _dark: "#171B1F", base: "{colors.panel}" } },
+                },
+            },
             tokens: {
                 colors: {
                     critical: { value: "#C5221C" },
@@ -29,6 +47,12 @@ export default defineConfig({
                     steelHover: { value: "#24486B" },
                     steelTint: { value: "#E7EDF3" },
                 },
+                fontSizes: {
+                    base: { value: "13px" },
+                    caption: { value: "11px" },
+                    small: { value: "12px" },
+                    title: { value: "15px" },
+                },
                 fonts: {
                     mono: {
                         value: "'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
@@ -37,33 +61,9 @@ export default defineConfig({
                         value: "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
                     },
                 },
-                fontSizes: {
-                    base: { value: "13px" },
-                    caption: { value: "11px" },
-                    small: { value: "12px" },
-                    title: { value: "15px" },
-                },
                 sizes: {
                     splitter: { value: "9px" },
                     toolbar: { value: "52px" },
-                },
-            },
-            semanticTokens: {
-                colors: {
-                    borderHairline: { value: { base: "{colors.grid}", _dark: "#2A3036" } },
-                    canvas: { value: { base: "{colors.paper}", _dark: "#0E1114" } },
-                    controlBorder: { value: "rgba(255, 255, 255, 0.45)" },
-                    controlHover: { value: "rgba(255, 255, 255, 0.12)" },
-                    ink: { value: { base: "{colors.graphite}", _dark: "#EDEFF1" } },
-                    inkMuted: { value: { base: "{colors.slate}", _dark: "#9AA4AF" } },
-                    inkOnPrimary: { value: { base: "{colors.panel}", _dark: "#0E1114" } },
-                    primary: { value: { base: "{colors.steel}", _dark: "#4E7CB0" } },
-                    primaryHover: { value: { base: "{colors.steelHover}", _dark: "#3D6695" } },
-                    progressOverlay: { value: "rgba(0, 0, 0, 0.12)" },
-                    progressOverlayCritical: { value: "rgba(0, 0, 0, 0.18)" },
-                    scrimOnPrimary: { value: "rgba(0, 0, 0, 0.18)" },
-                    selectionBg: { value: { base: "{colors.steelTint}", _dark: "#1C3A57" } },
-                    surface: { value: { base: "{colors.panel}", _dark: "#171B1F" } },
                 },
             },
         },

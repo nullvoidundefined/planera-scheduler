@@ -19,6 +19,7 @@ import type { ScheduleResult } from "../../types/cpm";
 import type { Activity, ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
 
 import { detectCycle } from "./detectCycle";
+import { earlyStartFromDependency } from "./earlyStartFromDependency";
 import { sortActivitiesTopologically } from "./sortActivitiesTopologically";
 
 export function computeSchedule(graph: ScheduleGraph): ScheduleResult {
@@ -119,24 +120,6 @@ function runForwardPass(
     }
 
     return { earlyFinish, earlyStart };
-}
-
-export function earlyStartFromDependency(
-    dependency: Dependency,
-    predecessorEarlyStart: number,
-    predecessorEarlyFinish: number,
-    activityDuration: number,
-): number {
-    switch (dependency.type) {
-        case "FS":
-            return predecessorEarlyFinish + dependency.lagDays;
-        case "SS":
-            return predecessorEarlyStart + dependency.lagDays;
-        case "FF":
-            return predecessorEarlyFinish + dependency.lagDays - activityDuration;
-        case "SF":
-            return predecessorEarlyStart + dependency.lagDays - activityDuration;
-    }
 }
 
 function computeProjectFinish(earlyFinish: Map<string, number>): number {
