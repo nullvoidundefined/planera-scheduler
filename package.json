@@ -7,6 +7,7 @@
         "prepare": "panda codegen",
         "dev": "vite",
         "build": "panda codegen && tsc -p tsconfig.json --noEmit && vite build",
+        "start": "serve -s dist -l tcp://0.0.0.0:${PORT:-3000}",
         "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
         "lint": "eslint .",
         "format": "prettier --write \"src/**/*.{ts,tsx}\"",
@@ -27,6 +28,7 @@
         "dhtmlx-gantt": "^9.0.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "serve": "^14.2.6",
         "zustand": "^5.0.14"
     },
     "devDependencies": {
