@@ -33,4 +33,11 @@ describe("ArchitectureRoute", () => {
             ).toBeInTheDocument();
         }
     });
+
+    test("renders the AI-first section heading", () => {
+        renderRoute();
+        expect(
+            screen.getByRole("heading", { level: 2, name: "How I built this" }),
+        ).toBeInTheDocument();
+    });
 });

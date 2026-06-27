@@ -8,6 +8,7 @@ import type { JSX } from "react";
 
 import { css } from "../../../styled-system/css";
 import { ProseSection } from "../../components/ProseSection/ProseSection";
+import { AI_FIRST_SECTION } from "../../content/aiFirstContent";
 import { ARCHITECTURE_SECTIONS } from "../../content/architectureSections";
 
 const INTRO =
@@ -37,6 +38,7 @@ export function ArchitectureRoute(): JSX.Element {
             {ARCHITECTURE_SECTIONS.map((section) => (
                 <ProseSection key={section.id} section={section} />
             ))}
+            <ProseSection section={AI_FIRST_SECTION} />
         </main>
     );
 }
