@@ -18,13 +18,14 @@ const EMPTY_CELL = "";
 const FINISH_COLUMN_WIDTH_PX = 104;
 const FLOAT_COLUMN_WIDTH_PX = 88;
 const CRITICAL_COLUMN_WIDTH_PX = 56;
+const NAME_COLUMN_MIN_WIDTH_PX = 200;
 const NAME_COLUMN_WIDTH = "*";
 const START_COLUMN_WIDTH_PX = 104;
 const WBS_COLUMN_WIDTH_PX = 96;
 
 export const GANTT_GRID_COLUMNS: GridColumn[] = [
     { align: "left", label: "WBS", name: "wbs", resize: true, template: renderWbs, width: WBS_COLUMN_WIDTH_PX },
-    { align: "left", label: "Name", name: "text", resize: true, tree: true, width: NAME_COLUMN_WIDTH },
+    { align: "left", label: "Name", min_width: NAME_COLUMN_MIN_WIDTH_PX, name: "text", resize: true, tree: true, width: NAME_COLUMN_WIDTH },
     {
         align: "right",
         label: "Duration (d)",

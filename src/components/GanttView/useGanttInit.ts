@@ -28,6 +28,7 @@ import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleSelection } from "../../state/useScheduleSelection";
 import type { ComputedActivity } from "../../types/schedule";
 
+import { attachGridResizer } from "./attachGridResizer";
 import { GANTT_GRID_COLUMNS } from "./ganttGridColumns";
 import { resolveCriticalLinkClass } from "./resolveCriticalLinkClass";
 import { resolveCriticalTaskClass } from "./resolveCriticalTaskClass";
@@ -39,7 +40,8 @@ const DAYS_PER_WEEK = 7;
 const GANTT_BAR_HEIGHT_PX = 18;
 const GANTT_DATE_FORMAT = "%Y-%m-%d %H:%i";
 const GANTT_DURATION_UNIT = "day";
-const GANTT_GRID_WIDTH_PX = 720;
+const GANTT_GRID_WIDTH_PX = 920;
+const GANTT_RESIZER_WIDTH_PX = 8;
 const GANTT_ROW_HEIGHT_PX = 30;
 const GROUP_ACTIVITY_TYPE = "group";
 const MIN_BAR_DURATION_DAYS = 1;
@@ -58,7 +60,7 @@ const GANTT_LAYOUT = {
         {
             cols: [
                 { id: "grid", scrollX: "scrollHor", scrollY: "scrollVer", view: "grid" },
-                { resizer: true, width: 1 },
+                { resizer: true, width: GANTT_RESIZER_WIDTH_PX },
                 { id: "timeline", scrollX: "scrollHor", scrollY: "scrollVer", view: "timeline" },
                 { id: "scrollVer", scroll: "y", view: "scrollbar" },
             ],
@@ -113,6 +115,7 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
         const calendar = createCalendar();
         configureGantt();
         gantt.init(container);
+        const detachGridResizer = attachGridResizer(container);
         applyZoomLevels();
         addTodayMarker();
 
@@ -133,6 +136,7 @@ export function useGanttInit(containerRef: RefObject<HTMLDivElement | null>): vo
 
         return () => {
             detachDrag();
+            detachGridResizer();
             detachSelection();
             detachCollapse();
             unsubscribe();

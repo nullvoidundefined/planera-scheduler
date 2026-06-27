@@ -54,10 +54,34 @@ body,
     font-weight: 600;
 }
 
-/* The draggable grid/timeline divider in grid color, matching the drafting grid. */
+/* DHTMLX GPL registers the layout resizer view with a null create function, so
+ * { resizer: true } in the layout config produces no DOM element. The rules below
+ * are kept for PRO builds. The actual grab target is .gantt-grid-resize-handle,
+ * injected by attachGridResizer.ts after gantt.init(). */
+.gantt_layout_cell.gantt_resizer {
+    cursor: col-resize;
+}
+
 .gantt_layout_cell.gantt_resizer .gantt_layout_content,
 .gantt_resizer_x .gantt_resizer_stick {
     background-color: var(--colors-grid);
+    cursor: col-resize;
+}
+
+.gantt_layout_cell.gantt_resizer:hover .gantt_layout_content {
+    background-color: var(--colors-float);
+}
+
+/* Custom grid/timeline drag handle: 8 px wide, col-resize cursor, float on hover. */
+.gantt-grid-resize-handle {
+    cursor: col-resize;
+    position: absolute;
+    width: 8px;
+    z-index: 10;
+}
+
+.gantt-grid-resize-handle:hover {
+    background-color: var(--colors-float);
 }
 
 .gantt_task_cell,
