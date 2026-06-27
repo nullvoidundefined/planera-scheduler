@@ -32,5 +32,9 @@ These override the referenced configuration for this project only, and only as s
   PandaCSS tokens and recipes.
 - **Two views, not three.** The original PDD described a third Whiteboard view; it is dropped (see
   the spec). This is a product-scope decision, not a rules override, recorded here for clarity.
+- **Merge commits, never squash.** The shared PR workflow specifies "squash merge only"; this
+  project merges PRs with a merge commit (`gh pr merge <n> --merge --delete-branch`) instead. The
+  repo is a hiring artifact, and its granular per-task, tested-and-reviewed commit history is a
+  showcase a reviewer can browse, which squashing would collapse.
 
 Everything not listed here follows the global and shared configuration unchanged.
