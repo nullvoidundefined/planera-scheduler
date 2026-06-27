@@ -31,8 +31,8 @@ const headerClass = css({ borderBottom: "1px solid token(colors.borderHairline)"
 const skipLinkClass = css({
     _focus: {
         bg: "primary",
-        color: "inkOnPrimary",
         clip: "auto",
+        color: "inkOnPrimary",
         height: "auto",
         left: "8px",
         padding: "8px 12px",
