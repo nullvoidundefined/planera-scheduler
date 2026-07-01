@@ -9,7 +9,7 @@ import type { ProseSection } from "../types/prose";
 export const ARCHITECTURE_SECTIONS: ProseSection[] = [
     {
         body: [
-            "From the outside, the cleanest way to explain Planera is that there isn't really a Gantt and a table and a whiteboard. There's one CPM graph, and those three things are just different ways of drawing it. Activities are nodes, dependencies are edges, and each view subscribes to the same source of truth.",
+            "From the outside, the cleanest way to explain Planera is that there isn't really a Gantt and a table and a whiteboard. There's one CPM graph, and those three views are just different ways of presenting it. Activities are nodes, dependencies are edges, and each view subscribes to the same source of truth.",
             "Edit a duration in the table and the Gantt bar moves, because they're reading the same data, not syncing three copies. My bet is that this single-model-many-renderers shape is the thing that keeps the product from drowning in three-way sync bugs.",
         ],
         heading: "The bet: one model, three views",
