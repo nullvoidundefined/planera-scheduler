@@ -3,9 +3,11 @@ import { describe, expect, test } from "vitest";
 import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../../content/summaryContent";
 
 describe("summary content", () => {
-    test("leads with the cover-letter framing", () => {
+    test("leads with the met-the-team framing", () => {
         expect(SUMMARY_HEADING).toBe("I built you a Planera demo");
-        expect(SUMMARY_PARAGRAPHS.some((p) => p.includes("instead of a cover letter"))).toBe(true);
+        expect(
+            SUMMARY_PARAGRAPHS.some((p) => p.includes("met with some members of your team")),
+        ).toBe(true);
     });
 
     test("is honest about scope: whiteboard left out and single-user", () => {

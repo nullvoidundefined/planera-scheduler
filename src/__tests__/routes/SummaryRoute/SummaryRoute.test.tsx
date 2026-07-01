@@ -18,7 +18,7 @@ describe("SummaryRoute", () => {
         expect(
             screen.getByRole("heading", { level: 1, name: "I built you a Planera demo" }),
         ).toBeInTheDocument();
-        expect(screen.getByText(/instead of a cover letter/)).toBeInTheDocument();
+        expect(screen.getByText(/met with some members of your team/)).toBeInTheDocument();
     });
 
     test("offers the two calls to action", () => {
