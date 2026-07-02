@@ -25,12 +25,12 @@ import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
+    graph: ScheduleGraph;
+    lastOperationOrigin: OperationOrigin | null;
     dispatchOperation(
         operation: Operation,
         origin?: OperationOrigin,
     ): { ok: true } | { cycle: string[]; ok: false };
-    graph: ScheduleGraph;
-    lastOperationOrigin: OperationOrigin | null;
     loadGraph(graph: ScheduleGraph): void;
     reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void;
 }
