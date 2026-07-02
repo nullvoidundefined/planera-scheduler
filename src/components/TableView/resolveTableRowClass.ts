@@ -6,7 +6,7 @@
  * phase row carries both. The phase color map is the shared source of truth across
  * views. Wired into the getRowClass hook in TableView.
  */
-import type { TableRow } from "./toTableRows";
+import type { TableRow } from "./types";
 
 const CRITICAL_ROW_CLASS = "ag-row-critical";
 const GROUP_ROW_TYPE = "group";

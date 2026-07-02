@@ -11,7 +11,7 @@ import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 import type { JSX } from "react";
 
 import { css } from "../../../styled-system/css";
-import { useScheduleQuery } from "../../api/useScheduleQuery";
+import { useScheduleQuery } from "../../state/useScheduleQuery";
 import { SCHEDULE_VIEW_GANTT, SCHEDULE_VIEW_TABLE } from "../../constants/scheduleView";
 import { useScheduleStore } from "../../state/scheduleStore";
 import { useScheduleView } from "../../state/useScheduleView";

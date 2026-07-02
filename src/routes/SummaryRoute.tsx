@@ -6,8 +6,8 @@
 import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
-import { css } from "../../../styled-system/css";
-import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../../content/summaryContent";
+import { css } from "../../styled-system/css";
+import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../data/summaryContent";
 
 const mainClass = css({
     fontFamily: "sans",

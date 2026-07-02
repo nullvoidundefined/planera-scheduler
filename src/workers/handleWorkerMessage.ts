@@ -10,11 +10,11 @@ import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
 import type { Operation } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
 
-export type WorkerMessage =
+type WorkerMessage =
     | { graph: ScheduleGraph; kind: "full" }
     | { graph: ScheduleGraph; kind: "operation"; operation: Operation };
 
-export interface WorkerResult {
+interface WorkerResult {
     computed: Map<string, ComputedActivity>;
     delta: ComputedActivity[];
 }

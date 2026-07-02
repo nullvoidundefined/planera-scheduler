@@ -10,21 +10,10 @@ import { computeSummaries } from "../../services/cpm/computeSummaries";
 import type { Calendar } from "../../types/calendar";
 import type { Activity, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
+import type { GanttTask } from "./types";
+
 const MIN_BAR_DURATION_DAYS = 1;
 const ROOT_PARENT = "0";
-
-export interface GanttTask {
-    duration: number;
-    id: string;
-    isCritical: boolean;
-    open: boolean;
-    parent: string;
-    start_date: Date;
-    text: string;
-    totalFloat: number;
-    type: string;
-    wbs: string;
-}
 
 export function toGanttTasks(
     graph: ScheduleGraph,
@@ -53,7 +42,10 @@ function toGanttTask(
     const earlyFinish = entry?.earlyFinish ?? 0;
     const earlyStart = entry?.earlyStart ?? 0;
     return {
-        duration: Math.max(earlyFinish - earlyStart, activity.type === "milestone" ? 0 : MIN_BAR_DURATION_DAYS),
+        duration: Math.max(
+            earlyFinish - earlyStart,
+            activity.type === "milestone" ? 0 : MIN_BAR_DURATION_DAYS,
+        ),
         id: activity.id,
         isCritical: entry?.isCritical ?? false,
         open: true,

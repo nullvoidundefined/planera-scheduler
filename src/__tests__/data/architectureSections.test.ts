@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { ARCHITECTURE_SECTIONS } from "../../content/architectureSections";
+import { ARCHITECTURE_SECTIONS } from "../../data/architectureSections";
 
 const EXPECTED_IDS = [
     "oneModelThreeViews",

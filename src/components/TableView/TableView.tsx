@@ -29,7 +29,7 @@ import { useScheduleSelection } from "../../state/useScheduleSelection";
 
 import { registerGridModules } from "./registerGridModules";
 import { resolveTableRowClass } from "./resolveTableRowClass";
-import type { TableRow } from "./toTableRows";
+import type { TableRow } from "./types";
 import { toTableRows } from "./toTableRows";
 
 registerGridModules();

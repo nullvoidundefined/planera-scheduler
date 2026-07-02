@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { JSX, ReactNode } from "react";
 import { describe, expect, test } from "vitest";
 
-import { useScheduleQuery } from "../../api/useScheduleQuery";
+import { useScheduleQuery } from "../../state/useScheduleQuery";
 import { useScheduleStore } from "../../state/scheduleStore";
 
 function wrapper({ children }: { children: ReactNode }): JSX.Element {

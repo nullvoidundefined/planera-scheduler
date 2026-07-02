@@ -4,9 +4,9 @@
  */
 import type { JSX } from "react";
 
-import { css } from "../../../styled-system/css";
-import { AppShell } from "../../components/AppShell/AppShell";
-import { DemoCaption } from "../../components/DemoCaption/DemoCaption";
+import { css } from "../../styled-system/css";
+import { AppShell } from "../components/AppShell/AppShell";
+import { DemoCaption } from "../components/DemoCaption/DemoCaption";
 
 const visuallyHiddenClass = css({
     clip: "rect(0 0 0 0)",

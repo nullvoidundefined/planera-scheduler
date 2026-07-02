@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { resolveGroupColorClass } from "../../../components/GanttView/resolveGroupColorClass";
-import type { GanttTask } from "../../../components/GanttView/toGanttTasks";
+import type { GanttTask } from "../../../components/GanttView/types";
 
 function buildTask(
     overrides: Partial<GanttTask> & Pick<GanttTask, "id" | "parent" | "type">,

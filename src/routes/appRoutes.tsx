@@ -6,9 +6,9 @@
 import { createBrowserRouter, type RouteObject } from "react-router-dom";
 
 import { SiteShell } from "../components/SiteShell/SiteShell";
-import { ArchitectureRoute } from "../routes/ArchitectureRoute/ArchitectureRoute";
-import { DemoRoute } from "../routes/DemoRoute/DemoRoute";
-import { SummaryRoute } from "../routes/SummaryRoute/SummaryRoute";
+import { ArchitectureRoute } from "./ArchitectureRoute";
+import { DemoRoute } from "./DemoRoute";
+import { SummaryRoute } from "./SummaryRoute";
 
 export const appRoutes: RouteObject[] = [
     {

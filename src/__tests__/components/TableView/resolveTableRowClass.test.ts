@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { resolveTableRowClass } from "../../../components/TableView/resolveTableRowClass";
-import type { TableRow } from "../../../components/TableView/toTableRows";
+import type { TableRow } from "../../../components/TableView/types";
 
 function buildRow(overrides: Partial<TableRow> & Pick<TableRow, "id" | "path" | "type">): TableRow {
     return {

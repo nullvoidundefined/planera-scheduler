@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, test } from "vitest";
 
-import { ARCHITECTURE_SECTIONS } from "../../../content/architectureSections";
-import { ArchitectureRoute } from "../../../routes/ArchitectureRoute/ArchitectureRoute";
+import { ARCHITECTURE_SECTIONS } from "../../data/architectureSections";
+import { ArchitectureRoute } from "../../routes/ArchitectureRoute";
 
 function renderRoute(): void {
     render(
