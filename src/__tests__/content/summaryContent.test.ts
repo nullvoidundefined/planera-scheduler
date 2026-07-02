@@ -16,7 +16,9 @@ describe("summary content", () => {
         expect(joined).toContain("single-user");
     });
 
-    test("names the motive as interest, not a flex", () => {
-        expect(SUMMARY_PARAGRAPHS.some((p) => p.includes("Not a flex"))).toBe(true);
+    test("names the motive as interest and defers to the mature product", () => {
+        const joined = SUMMARY_PARAGRAPHS.join(" ");
+        expect(joined).toContain("do the homework");
+        expect(joined).toContain("most of the actual engineering");
     });
 });
