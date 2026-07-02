@@ -11,6 +11,7 @@
  * with non-negative lag and points strictly forward, so the graph is a DAG by
  * construction. Reproducible per seed for stable tests and demos.
  */
+import { ACTIVITY_TYPE_GROUP } from "../constants/activityType";
 import {
     CRITICAL_BAND_BUFFER,
     CRITICAL_LANES,
@@ -25,7 +26,7 @@ import {
     PHASE_TRANSITION_MAX_LAG,
     WITHIN_LANE_MAX_LAG,
 } from "../constants/generator";
-import type { Activity, ActivityType, Dependency, ScheduleGraph } from "../types/schedule";
+import type { Activity, Dependency, ScheduleGraph } from "../types/schedule";
 
 import { buildActivityName } from "./buildActivityName";
 
@@ -48,8 +49,7 @@ export function generateSchedule(options?: {
     activityCount?: number;
     seed?: number;
 }): ScheduleGraph {
-    const seed = options?.seed ?? DEFAULT_SEED;
-    const activityCount = options?.activityCount ?? DEFAULT_ACTIVITY_COUNT;
+    const { activityCount = DEFAULT_ACTIVITY_COUNT, seed = DEFAULT_SEED } = options ?? {};
     const rand = buildPrng(seed);
 
     const projects = buildProjectNodes();
@@ -62,7 +62,7 @@ export function generateSchedule(options?: {
 
 function buildPrng(seed: number): () => number {
     let state = seed;
-    return function prng(): number {
+    return function generateRandomNumber(): number {
         state = (state + 0x6d2b79f5) | 0;
         let z = Math.imul(state ^ (state >>> 15), 1 | state);
         z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) | 0;
@@ -76,7 +76,7 @@ function buildProjectNodes(): Activity[] {
         id: buildProjectId(index),
         name,
         parentId: null,
-        type: "group" as ActivityType,
+        type: ACTIVITY_TYPE_GROUP,
         wbs: `${index + 1}`,
     }));
 }
@@ -90,7 +90,7 @@ function buildPhaseNodes(projects: Activity[]): Activity[] {
                 id: buildPhaseId(projects[projectIndex].id, phaseIndex),
                 name: PHASE_NAMES[phaseIndex],
                 parentId: projects[projectIndex].id,
-                type: "group",
+                type: ACTIVITY_TYPE_GROUP,
                 wbs: `${projectIndex + 1}.${phaseIndex + 1}`,
             });
         }
@@ -139,7 +139,7 @@ function buildLeafActivities(
 
 function buildDependencies(leaves: Activity[], rand: () => number): Dependency[] {
     const dependencies: Dependency[] = [];
-    const earlyFinish = new Array<number>(leaves.length).fill(0);
+    const earlyFinishes = new Array<number>(leaves.length).fill(0);
     const segments = buildPhaseSegments(leaves);
     let previousMergeIndex: number | null = null;
 
@@ -149,7 +149,7 @@ function buildDependencies(leaves: Activity[], rand: () => number): Dependency[]
         previousMergeIndex = appendPhaseDependencies(
             dependencies,
             leaves,
-            earlyFinish,
+            earlyFinishes,
             segment,
             anchorIndex,
             rand,
@@ -162,10 +162,10 @@ function buildPhaseSegments(leaves: Activity[]): PhaseSegment[] {
     const segments: PhaseSegment[] = [];
     let segmentStart = 0;
     for (let index = 1; index <= leaves.length; index++) {
-        const reachedEnd = index === leaves.length;
-        const crossedBoundary =
-            !reachedEnd && leaves[index].parentId !== leaves[segmentStart].parentId;
-        if (reachedEnd || crossedBoundary) {
+        const hasReachedEnd = index === leaves.length;
+        const hasCrossedBoundary =
+            !hasReachedEnd && leaves[index].parentId !== leaves[segmentStart].parentId;
+        if (hasReachedEnd || hasCrossedBoundary) {
             segments.push({
                 endIndex: index,
                 parentId: leaves[segmentStart].parentId ?? "",
@@ -189,7 +189,7 @@ function buildPhaseSegments(leaves: Activity[]): PhaseSegment[] {
 function appendPhaseDependencies(
     dependencies: Dependency[],
     leaves: Activity[],
-    earlyFinish: number[],
+    earlyFinishes: number[],
     segment: PhaseSegment,
     anchorIndex: number | null,
     rand: () => number,
@@ -199,10 +199,10 @@ function appendPhaseDependencies(
     const laneCount = Math.max(0, Math.ceil((mergeIndex - startIndex) / LANE_LENGTH));
 
     for (let index = startIndex; index < mergeIndex; index++) {
-        earlyFinish[index] = wireLaneActivity(
+        earlyFinishes[index] = wireLaneActivity(
             dependencies,
             leaves,
-            earlyFinish,
+            earlyFinishes,
             segment,
             anchorIndex,
             index,
@@ -213,13 +213,13 @@ function appendPhaseDependencies(
     const mergeEarlyStart = appendMergeGate(
         dependencies,
         leaves,
-        earlyFinish,
+        earlyFinishes,
         segment,
         anchorIndex,
         laneCount,
         rand,
     );
-    earlyFinish[mergeIndex] = mergeEarlyStart + leaves[mergeIndex].durationDays;
+    earlyFinishes[mergeIndex] = mergeEarlyStart + leaves[mergeIndex].durationDays;
     return mergeIndex;
 }
 
@@ -231,59 +231,103 @@ function appendPhaseDependencies(
 function wireLaneActivity(
     dependencies: Dependency[],
     leaves: Activity[],
-    earlyFinish: number[],
+    earlyFinishes: number[],
     segment: PhaseSegment,
     anchorIndex: number | null,
     index: number,
     rand: () => number,
 ): number {
-    const { startIndex } = segment;
-    const positionInPhase = index - startIndex;
+    const positionInPhase = index - segment.startIndex;
     const laneIndex = Math.floor(positionInPhase / LANE_LENGTH);
     const positionInLane = positionInPhase % LANE_LENGTH;
-    let earlyStart = 0;
 
+    const laneEarlyStart = wireLanePredecessor(
+        dependencies,
+        leaves,
+        earlyFinishes,
+        anchorIndex,
+        index,
+        positionInLane,
+        rand,
+    );
+    const earlyStart = applyCrossLaneEdge(
+        dependencies,
+        leaves,
+        earlyFinishes,
+        segment,
+        index,
+        laneIndex,
+        positionInLane,
+        laneEarlyStart,
+        rand,
+    );
+
+    return earlyStart + leaves[index].durationDays;
+}
+
+// The lane's first activity anchors to the previous phase's merge gate (or starts
+// at zero in a project's first phase); every later activity chains finish-to-start
+// to the one before it in the same lane.
+function wireLanePredecessor(
+    dependencies: Dependency[],
+    leaves: Activity[],
+    earlyFinishes: number[],
+    anchorIndex: number | null,
+    index: number,
+    positionInLane: number,
+    rand: () => number,
+): number {
     if (positionInLane === 0) {
-        if (anchorIndex !== null) {
-            const lag = pushDependency(
-                dependencies,
-                anchorIndex,
-                index,
-                leaves,
-                rand,
-                PHASE_TRANSITION_MAX_LAG,
-            );
-            earlyStart = earlyFinish[anchorIndex] + lag;
+        if (anchorIndex === null) {
+            return 0;
         }
-    } else {
         const lag = pushDependency(
             dependencies,
-            index - 1,
+            anchorIndex,
             index,
             leaves,
             rand,
-            WITHIN_LANE_MAX_LAG,
+            PHASE_TRANSITION_MAX_LAG,
         );
-        earlyStart = earlyFinish[index - 1] + lag;
+        return earlyFinishes[anchorIndex] + lag;
     }
 
-    if (laneIndex > 0 && rand() < CROSS_LANE_CHANCE) {
-        const crossLaneIndex =
-            startIndex + Math.floor(rand() * laneIndex) * LANE_LENGTH + positionInLane;
-        if (crossLaneIndex < index) {
-            const lag = pushDependency(
-                dependencies,
-                crossLaneIndex,
-                index,
-                leaves,
-                rand,
-                CROSS_LANE_MAX_LAG,
-            );
-            earlyStart = Math.max(earlyStart, earlyFinish[crossLaneIndex] + lag);
-        }
+    const lag = pushDependency(dependencies, index - 1, index, leaves, rand, WITHIN_LANE_MAX_LAG);
+    return earlyFinishes[index - 1] + lag;
+}
+
+// A sparse cross-lane edge can tie the activity to an earlier lane at the same
+// depth so the critical path can weave between crews.
+function applyCrossLaneEdge(
+    dependencies: Dependency[],
+    leaves: Activity[],
+    earlyFinishes: number[],
+    segment: PhaseSegment,
+    index: number,
+    laneIndex: number,
+    positionInLane: number,
+    laneEarlyStart: number,
+    rand: () => number,
+): number {
+    if (laneIndex === 0 || rand() >= CROSS_LANE_CHANCE) {
+        return laneEarlyStart;
     }
 
-    return earlyStart + leaves[index].durationDays;
+    const crossLaneIndex =
+        segment.startIndex + Math.floor(rand() * laneIndex) * LANE_LENGTH + positionInLane;
+    if (crossLaneIndex >= index) {
+        return laneEarlyStart;
+    }
+
+    const lag = pushDependency(
+        dependencies,
+        crossLaneIndex,
+        index,
+        leaves,
+        rand,
+        CROSS_LANE_MAX_LAG,
+    );
+    return Math.max(laneEarlyStart, earlyFinishes[crossLaneIndex] + lag);
 }
 
 // Tie the critical band into the phase's merge gate. The gate's early start is
@@ -294,44 +338,83 @@ function wireLaneActivity(
 function appendMergeGate(
     dependencies: Dependency[],
     leaves: Activity[],
-    earlyFinish: number[],
+    earlyFinishes: number[],
     segment: PhaseSegment,
     anchorIndex: number | null,
     laneCount: number,
     rand: () => number,
 ): number {
-    const { startIndex } = segment;
     const mergeIndex = segment.endIndex - 1;
     const bandLaneCount = Math.min(CRITICAL_LANES, laneCount);
 
     if (bandLaneCount === 0) {
-        if (anchorIndex === null) {
-            return 0;
-        }
-        const lag = pushDependency(
+        return appendGateForEmptyBand(
             dependencies,
-            anchorIndex,
-            mergeIndex,
             leaves,
+            earlyFinishes,
+            mergeIndex,
+            anchorIndex,
             rand,
-            PHASE_TRANSITION_MAX_LAG,
         );
-        return earlyFinish[anchorIndex] + lag;
     }
 
+    const target = computeBandTarget(earlyFinishes, segment);
+    wireGateBandDependencies(dependencies, leaves, earlyFinishes, segment, bandLaneCount, target);
+    return target;
+}
+
+// A phase with no full lane has only the anchor-to-gate edge (or nothing in a
+// project's first phase); its gate early start follows straight from the anchor.
+function appendGateForEmptyBand(
+    dependencies: Dependency[],
+    leaves: Activity[],
+    earlyFinishes: number[],
+    mergeIndex: number,
+    anchorIndex: number | null,
+    rand: () => number,
+): number {
+    if (anchorIndex === null) {
+        return 0;
+    }
+    const lag = pushDependency(
+        dependencies,
+        anchorIndex,
+        mergeIndex,
+        leaves,
+        rand,
+        PHASE_TRANSITION_MAX_LAG,
+    );
+    return earlyFinishes[anchorIndex] + lag;
+}
+
+// The gate is pinned to the latest lane finish plus a buffer, so the critical
+// band finishes after every other lane and determines the project span.
+function computeBandTarget(earlyFinishes: number[], segment: PhaseSegment): number {
+    const mergeIndex = segment.endIndex - 1;
     let latestLaneFinish = 0;
-    for (let index = startIndex; index < mergeIndex; index++) {
-        latestLaneFinish = Math.max(latestLaneFinish, earlyFinish[index]);
+    for (let index = segment.startIndex; index < mergeIndex; index++) {
+        latestLaneFinish = Math.max(latestLaneFinish, earlyFinishes[index]);
     }
-    const target = latestLaneFinish + CRITICAL_BAND_BUFFER;
+    return latestLaneFinish + CRITICAL_BAND_BUFFER;
+}
 
+// Each band lane reaches the pinned target through a non-negative padding lag,
+// giving the band exact ties rather than a single longest lane.
+function wireGateBandDependencies(
+    dependencies: Dependency[],
+    leaves: Activity[],
+    earlyFinishes: number[],
+    segment: PhaseSegment,
+    bandLaneCount: number,
+    target: number,
+): void {
+    const mergeIndex = segment.endIndex - 1;
     for (let lane = 0; lane < bandLaneCount; lane++) {
         const laneTerminalIndex =
-            Math.min(startIndex + lane * LANE_LENGTH + LANE_LENGTH, mergeIndex) - 1;
-        const paddingLag = target - earlyFinish[laneTerminalIndex];
+            Math.min(segment.startIndex + lane * LANE_LENGTH + LANE_LENGTH, mergeIndex) - 1;
+        const paddingLag = target - earlyFinishes[laneTerminalIndex];
         pushDependencyWithLag(dependencies, laneTerminalIndex, mergeIndex, leaves, paddingLag);
     }
-    return target;
 }
 
 function pushDependency(
