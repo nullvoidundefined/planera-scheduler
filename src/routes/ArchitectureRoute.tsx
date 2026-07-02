@@ -13,14 +13,14 @@ import { ARCHITECTURE_SECTIONS } from "../data/architectureSections";
 const INTRO =
     "This is my read, from the outside, of how the library-based half of Planera's frontend fits together: the Gantt and the table as two renderers over one CPM graph. Planera is a mature product your team has hardened over years; this is a few-days sketch of two of its views, not a claim to match it. I left the whiteboard out because it looks like a custom build with its own design problem. Where I'm reasoning about your internals rather than stating a fact, I've tried to say so.";
 
-const REPO_URL = "https://github.com/nullvoidundefined/planera-scheduler";
+const REPO_HEADING = "The source";
 
 const REPO_LABEL = "github.com/nullvoidundefined/planera-scheduler";
 
-const REPO_HEADING = "The source";
-
 const REPO_LEAD =
     "The demo this write-up accompanies is real, running code. The repo's public if you want to read it:";
+
+const REPO_URL = "https://github.com/nullvoidundefined/planera-scheduler";
 
 const mainClass = css({
     fontFamily: "sans",

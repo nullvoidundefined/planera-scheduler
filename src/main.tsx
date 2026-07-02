@@ -18,7 +18,7 @@ import { App } from "./App";
 import "./index.css";
 
 async function startApp(): Promise<void> {
-    const { worker } = await import("./mocks/browser");
+    const { worker } = await import("./mocks/mswBrowserWorker");
     await worker.start({ onUnhandledRequest: "bypass", quiet: import.meta.env.PROD });
 
     if (import.meta.env.DEV) {

@@ -7,6 +7,7 @@ import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
 import { css } from "../../styled-system/css";
+import { ROUTE_ARCHITECTURE_PATH, ROUTE_DEMO_PATH } from "../constants/routes";
 import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../data/summaryContent";
 
 const mainClass = css({
@@ -63,10 +64,10 @@ export function SummaryRoute(): JSX.Element {
                 </p>
             ))}
             <div className={ctaRowClass}>
-                <Link className={ctaPrimaryClass} to="/demo">
+                <Link className={ctaPrimaryClass} to={ROUTE_DEMO_PATH}>
                     Open the demo
                 </Link>
-                <Link className={ctaSecondaryClass} to="/architecture">
+                <Link className={ctaSecondaryClass} to={ROUTE_ARCHITECTURE_PATH}>
                     Read the write-up
                 </Link>
             </div>

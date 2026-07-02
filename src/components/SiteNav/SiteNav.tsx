@@ -7,6 +7,7 @@ import type { JSX } from "react";
 import { NavLink } from "react-router-dom";
 
 import { css } from "../../../styled-system/css";
+import { ROUTE_ARCHITECTURE_PATH, ROUTE_DEMO_PATH } from "../../constants/routes";
 
 const navClass = css({
     alignItems: "center",
@@ -32,10 +33,10 @@ export function SiteNav(): JSX.Element {
             <NavLink className={linkClass} end to="/">
                 Summary
             </NavLink>
-            <NavLink className={linkClass} to="/demo">
+            <NavLink className={linkClass} to={ROUTE_DEMO_PATH}>
                 Demo
             </NavLink>
-            <NavLink className={linkClass} to="/architecture">
+            <NavLink className={linkClass} to={ROUTE_ARCHITECTURE_PATH}>
                 Write-up
             </NavLink>
         </nav>
