@@ -25,7 +25,7 @@ describe("site routing", () => {
         expect(
             screen.getByRole("heading", {
                 level: 1,
-                name: "How I think Planera's frontend is built",
+                name: "My outside read of how Planera's frontend is built",
             }),
         ).toBeInTheDocument();
     });

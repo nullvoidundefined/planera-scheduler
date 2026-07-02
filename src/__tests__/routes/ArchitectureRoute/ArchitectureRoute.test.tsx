@@ -20,7 +20,7 @@ describe("ArchitectureRoute", () => {
         expect(
             screen.getByRole("heading", {
                 level: 1,
-                name: "How I think Planera's frontend is built",
+                name: "My outside read of how Planera's frontend is built",
             }),
         ).toBeInTheDocument();
     });
@@ -39,5 +39,18 @@ describe("ArchitectureRoute", () => {
         expect(
             screen.getByRole("heading", { level: 2, name: "How I built this" }),
         ).toBeInTheDocument();
+    });
+
+    test("links to the source repo under its own heading near the top", () => {
+        renderRoute();
+        expect(screen.getByRole("heading", { level: 2, name: "The source" })).toBeInTheDocument();
+        const repoLink = screen.getByRole("link", {
+            name: "github.com/nullvoidundefined/planera-scheduler",
+        });
+        expect(repoLink).toHaveAttribute(
+            "href",
+            "https://github.com/nullvoidundefined/planera-scheduler",
+        );
+        expect(repoLink).toHaveAttribute("rel", "noopener noreferrer");
     });
 });
