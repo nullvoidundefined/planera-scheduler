@@ -28,22 +28,26 @@ export function computeSchedule(graph: ScheduleGraph): ScheduleResult {
         return { cycle, ok: false };
     }
 
-    const sorted = sortActivitiesTopologically(graph);
-    const durations = buildDurationMap(sorted);
+    const sortedActivities = sortActivitiesTopologically(graph);
+    const durations = buildDurationMap(sortedActivities);
     const dependenciesBySuccessor = groupDependenciesBySuccessor(graph.dependencies);
     const dependenciesByPredecessor = groupDependenciesByPredecessor(graph.dependencies);
 
-    const { earlyStart, earlyFinish } = runForwardPass(sorted, durations, dependenciesBySuccessor);
+    const { earlyStart, earlyFinish } = runForwardPass(
+        sortedActivities,
+        durations,
+        dependenciesBySuccessor,
+    );
     const projectFinish = computeProjectFinish(earlyFinish);
     const { lateStart, lateFinish } = runBackwardPass(
-        sorted,
+        sortedActivities,
         durations,
         dependenciesByPredecessor,
         projectFinish,
     );
 
     const activities = assembleComputedActivities(
-        sorted,
+        sortedActivities,
         earlyStart,
         earlyFinish,
         lateStart,
@@ -91,14 +95,14 @@ function appendToGroup(
 }
 
 function runForwardPass(
-    sorted: Activity[],
+    sortedActivities: Activity[],
     durations: Map<string, number>,
     dependenciesBySuccessor: Map<string, Dependency[]>,
 ): { earlyFinish: Map<string, number>; earlyStart: Map<string, number> } {
     const earlyStart = new Map<string, number>();
     const earlyFinish = new Map<string, number>();
 
-    for (const activity of sorted) {
+    for (const activity of sortedActivities) {
         const activityDuration = durations.get(activity.id) ?? 0;
         const predecessors = dependenciesBySuccessor.get(activity.id) ?? [];
 
@@ -131,7 +135,7 @@ function computeProjectFinish(earlyFinish: Map<string, number>): number {
 }
 
 function runBackwardPass(
-    sorted: Activity[],
+    sortedActivities: Activity[],
     durations: Map<string, number>,
     dependenciesByPredecessor: Map<string, Dependency[]>,
     projectFinish: number,
@@ -139,8 +143,8 @@ function runBackwardPass(
     const lateStart = new Map<string, number>();
     const lateFinish = new Map<string, number>();
 
-    for (let index = sorted.length - 1; index >= 0; index -= 1) {
-        const activity = sorted[index];
+    for (let index = sortedActivities.length - 1; index >= 0; index -= 1) {
+        const activity = sortedActivities[index];
         const activityDuration = durations.get(activity.id) ?? 0;
         const successors = dependenciesByPredecessor.get(activity.id) ?? [];
 
@@ -183,7 +187,7 @@ function lateFinishFromDependency(
 }
 
 function assembleComputedActivities(
-    sorted: Activity[],
+    sortedActivities: Activity[],
     earlyStart: Map<string, number>,
     earlyFinish: Map<string, number>,
     lateStart: Map<string, number>,
@@ -191,7 +195,7 @@ function assembleComputedActivities(
 ): Map<string, ComputedActivity> {
     const activities = new Map<string, ComputedActivity>();
 
-    for (const activity of sorted) {
+    for (const activity of sortedActivities) {
         const activityEarlyStart = earlyStart.get(activity.id) ?? 0;
         const activityLateStart = lateStart.get(activity.id) ?? 0;
         const totalFloat = activityLateStart - activityEarlyStart;
