@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { JSX } from "react";
 
 import { css } from "../../../styled-system/css";
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
 import { OPERATION_ORIGIN_TABLE } from "../../constants/operationOrigin";
 import { createCalendar } from "../../services/createCalendar";
 import { formatScheduleDate } from "../../services/formatScheduleDate";
@@ -29,8 +30,8 @@ import { useScheduleSelection } from "../../state/useScheduleSelection";
 
 import { registerGridModules } from "./registerGridModules";
 import { resolveTableRowClass } from "./resolveTableRowClass";
-import type { TableRow } from "./types";
 import { toTableRows } from "./toTableRows";
+import type { TableRow } from "./types";
 
 registerGridModules();
 
@@ -83,12 +84,12 @@ const COLUMN_DEFS: ColDef<TableRow>[] = [
     { cellClass: MONO_CELL_CLASS, field: WBS_FIELD, headerName: "WBS", width: 120 },
     {
         cellClass: MONO_CELL_CLASS,
-        editable: (params) => params.data?.type !== "group",
+        editable: (params) => params.data?.type !== ACTIVITY_TYPE_GROUP,
         field: DURATION_FIELD,
         headerName: "Duration (d)",
         valueSetter: (params: ValueSetterParams<TableRow>) => {
-            const next = Number(params.newValue);
-            if (!Number.isFinite(next) || next < 0) {
+            const nextDuration = Number(params.newValue);
+            if (!Number.isFinite(nextDuration) || nextDuration < 0) {
                 return false;
             }
             // AG-Grid compares data[field] before and after calling valueSetter to
@@ -96,7 +97,7 @@ const COLUMN_DEFS: ColDef<TableRow>[] = [
             // AG-Grid detects the change and fires the event. The Zustand store
             // (dispatchOperation in onCellValueChanged) is the authoritative source
             // of truth; this mutation just satisfies AG-Grid's change-detection gate.
-            params.data.duration = next;
+            params.data.duration = nextDuration;
             return true;
         },
         width: 130,
@@ -168,11 +169,12 @@ export function TableView(): JSX.Element {
 
     const onCellValueChanged = useCallback(
         (event: CellValueChangedEvent<TableRow>) => {
-            if (event.colDef.field === DURATION_FIELD) {
+            const { colDef, data, newValue } = event;
+            if (colDef.field === DURATION_FIELD) {
                 dispatchOperation(
                     {
-                        activityId: event.data.id,
-                        durationDays: Number(event.newValue),
+                        activityId: data.id,
+                        durationDays: Number(newValue),
                         kind: "resizeActivity",
                     },
                     OPERATION_ORIGIN_TABLE,
@@ -190,10 +192,11 @@ export function TableView(): JSX.Element {
             // no browser event attached. Dispatching for that api-driven change would
             // flip the shared state back and oscillate forever. Only a user click or
             // keypress carries event.event, so dispatch solely for those.
-            if (event.event === undefined || event.event === null) {
+            const { event: browserEvent, node } = event;
+            if (browserEvent === undefined || browserEvent === null) {
                 return;
             }
-            const rowId = event.node.id;
+            const rowId = node.id;
             if (rowId !== undefined && rowId !== null) {
                 dispatchOperation({ kind: "toggleCollapse", rowId }, OPERATION_ORIGIN_TABLE);
             }

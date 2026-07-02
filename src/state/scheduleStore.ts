@@ -25,12 +25,12 @@ import { handleWorkerMessage } from "../workers/handleWorkerMessage";
 interface ScheduleState {
     collapsed: Set<string>;
     computed: Map<string, ComputedActivity>;
-    graph: ScheduleGraph;
-    lastOperationOrigin: OperationOrigin | null;
     dispatchOperation(
         operation: Operation,
         origin?: OperationOrigin,
     ): { ok: true } | { cycle: string[]; ok: false };
+    graph: ScheduleGraph;
+    lastOperationOrigin: OperationOrigin | null;
     loadGraph(graph: ScheduleGraph): void;
     reconcileGlobalPass(graph: ScheduleGraph, operation: Operation, dispatchToken: number): void;
 }
@@ -128,7 +128,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
 
 let cpmWorker: Worker | null = null;
 let latestDispatchToken = 0;
-let workerInitialized = false;
+let isWorkerInitialized = false;
 
 function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): ScheduleGraph {
     switch (operation.kind) {
@@ -157,9 +157,9 @@ function applyOperationToGraph(graph: ScheduleGraph, operation: Operation): Sche
 }
 
 function getCpmWorker(): Worker | null {
-    if (!workerInitialized) {
+    if (!isWorkerInitialized) {
         cpmWorker = createCpmWorker();
-        workerInitialized = true;
+        isWorkerInitialized = true;
     }
     return cpmWorker;
 }
@@ -173,11 +173,11 @@ function mergeComputedDelta(
     computed: Map<string, ComputedActivity>,
     delta: ComputedActivity[],
 ): Map<string, ComputedActivity> {
-    const next = new Map(computed);
+    const nextComputed = new Map(computed);
     for (const entry of delta) {
-        next.set(entry.id, entry);
+        nextComputed.set(entry.id, entry);
     }
-    return next;
+    return nextComputed;
 }
 
 function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): string[] {
@@ -185,8 +185,10 @@ function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): s
         case "addDependency":
             return [operation.edge.successorId];
         case "removeDependency": {
-            const removed = graph.dependencies.find((edge) => edge.id === operation.edgeId);
-            return removed === undefined ? [] : [removed.successorId];
+            const removedDependency = graph.dependencies.find(
+                (edge) => edge.id === operation.edgeId,
+            );
+            return removedDependency === undefined ? [] : [removedDependency.successorId];
         }
         case "resizeActivity":
             return [operation.activityId];
@@ -196,11 +198,11 @@ function selectChangedActivityIds(graph: ScheduleGraph, operation: Operation): s
 }
 
 function toggleMembership(members: Set<string>, id: string): Set<string> {
-    const next = new Set(members);
-    if (next.has(id)) {
-        next.delete(id);
+    const nextMembers = new Set(members);
+    if (nextMembers.has(id)) {
+        nextMembers.delete(id);
     } else {
-        next.add(id);
+        nextMembers.add(id);
     }
-    return next;
+    return nextMembers;
 }

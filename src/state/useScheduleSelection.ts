@@ -6,8 +6,8 @@
 import { create } from "zustand";
 
 interface SelectionState {
-    selectedActivityId: string | null;
     selectActivity(id: string | null): void;
+    selectedActivityId: string | null;
 }
 
 export const useScheduleSelection = create<SelectionState>((set) => ({
