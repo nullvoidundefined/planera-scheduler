@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest";
 
-import { PHASE_PALETTE_SIZE } from "../constants/phasePaletteSize";
+import { PHASE_PALETTE_SIZE } from "../../constants/phasePaletteSize";
 
 // panda.config.ts is the single source of the raw palette; read it as text and
 // assert the rebrand's token contract holds (every phase tone present, the gold and
 // indigo tokens present, the retired red critical and steel tokens gone). This locks
 // the names the index.css overrides and recipes reference by var.
 const pandaConfig = Object.values(
-    import.meta.glob("../../panda.config.ts", { query: "?raw", import: "default", eager: true }),
+    import.meta.glob("../../../panda.config.ts", { query: "?raw", import: "default", eager: true }),
 )[0] as string;
 
 const PHASE_TONES = ["Bar", "Border", "Surface"];

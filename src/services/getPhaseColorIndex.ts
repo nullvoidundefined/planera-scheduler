@@ -6,6 +6,7 @@
  * full activity list so a phase keeps its color whether or not it is collapsed, and
  * both views resolve a phase id to its hue through this one source of truth.
  */
+import { ACTIVITY_TYPE_GROUP } from "../constants/activityType";
 import { PHASE_PALETTE_SIZE } from "../constants/phasePaletteSize";
 import type { Activity } from "../types/schedule";
 
@@ -13,7 +14,7 @@ export function getPhaseColorIndex(activities: Activity[]): Map<string, number> 
     const phaseColorIndex = new Map<string, number>();
     let position = 0;
     for (const activity of activities) {
-        if (activity.type === "group" && activity.parentId !== null) {
+        if (activity.type === ACTIVITY_TYPE_GROUP && activity.parentId !== null) {
             phaseColorIndex.set(activity.id, position % PHASE_PALETTE_SIZE);
             position += 1;
         }

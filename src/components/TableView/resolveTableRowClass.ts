@@ -6,10 +6,11 @@
  * phase row carries both. The phase color map is the shared source of truth across
  * views. Wired into the getRowClass hook in TableView.
  */
-import type { TableRow } from "./toTableRows";
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
+
+import type { TableRow } from "./types";
 
 const CRITICAL_ROW_CLASS = "ag-row-critical";
-const GROUP_ROW_TYPE = "group";
 const PHASE_PATH_DEPTH = 1;
 const PHASE_ROW_CLASS_PREFIX = "phase-";
 
@@ -29,7 +30,7 @@ export function resolveTableRowClass(
 }
 
 function resolvePhaseRowClass(row: TableRow, phaseColorIndex: Map<string, number>): string {
-    if (row.type !== GROUP_ROW_TYPE) {
+    if (row.type !== ACTIVITY_TYPE_GROUP) {
         return "";
     }
     const phaseId = row.path[PHASE_PATH_DEPTH];

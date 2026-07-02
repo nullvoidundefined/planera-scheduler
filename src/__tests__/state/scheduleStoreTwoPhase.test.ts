@@ -4,11 +4,11 @@ import { OPERATION_ORIGIN_GANTT } from "../../constants/operationOrigin";
 import { useScheduleStore } from "../../state/scheduleStore";
 import type { Activity, ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
 
-function task(id: string, durationDays: number): Activity {
+function buildTask(id: string, durationDays: number): Activity {
     return { durationDays, id, name: id, parentId: "ph", type: "task", wbs: id };
 }
 
-function edge(id: string, predecessorId: string, successorId: string): Dependency {
+function buildEdge(id: string, predecessorId: string, successorId: string): Dependency {
     return { id, lagDays: 0, predecessorId, successorId, type: "FS" };
 }
 
@@ -18,20 +18,20 @@ function edge(id: string, predecessorId: string, successorId: string): Dependenc
 const FLOAT_GRAPH: ScheduleGraph = {
     activities: [
         { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
-        task("S", 0),
-        task("A", 4),
-        task("B", 2),
-        task("C", 5),
-        task("D", 3),
-        task("E", 0),
+        buildTask("S", 0),
+        buildTask("A", 4),
+        buildTask("B", 2),
+        buildTask("C", 5),
+        buildTask("D", 3),
+        buildTask("E", 0),
     ],
     dependencies: [
-        edge("S->A", "S", "A"),
-        edge("S->B", "S", "B"),
-        edge("A->C", "A", "C"),
-        edge("B->D", "B", "D"),
-        edge("C->E", "C", "E"),
-        edge("D->E", "D", "E"),
+        buildEdge("S->A", "S", "A"),
+        buildEdge("S->B", "S", "B"),
+        buildEdge("A->C", "A", "C"),
+        buildEdge("B->D", "B", "D"),
+        buildEdge("C->E", "C", "E"),
+        buildEdge("D->E", "D", "E"),
     ],
 };
 
@@ -90,10 +90,12 @@ describe("useScheduleStore two-phase recompute", () => {
             }
         });
 
-        useScheduleStore.getState().dispatchOperation(
-            { activityId: "B", durationDays: 8, kind: "resizeActivity" },
-            OPERATION_ORIGIN_GANTT,
-        );
+        useScheduleStore
+            .getState()
+            .dispatchOperation(
+                { activityId: "B", durationDays: 8, kind: "resizeActivity" },
+                OPERATION_ORIGIN_GANTT,
+            );
         unsubscribe();
 
         // Phase 1 carries the gantt origin (suppressed in the Gantt), phase 2 clears it.

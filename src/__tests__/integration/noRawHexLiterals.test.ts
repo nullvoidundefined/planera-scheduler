@@ -7,9 +7,9 @@ import { describe, expect, test } from "vitest";
 const HEX_COLOR_PATTERN = /#[0-9a-fA-F]{3,8}\b/;
 
 const STYLED_SOURCES: Record<string, string> = {
-    ...import.meta.glob("../index.css", { query: "?raw", import: "default", eager: true }),
-    ...import.meta.glob("../**/*.recipe.ts", { query: "?raw", import: "default", eager: true }),
-    ...import.meta.glob("../components/**/*.tsx", {
+    ...import.meta.glob("../../index.css", { query: "?raw", import: "default", eager: true }),
+    ...import.meta.glob("../../**/*.recipe.ts", { query: "?raw", import: "default", eager: true }),
+    ...import.meta.glob("../../components/**/*.tsx", {
         query: "?raw",
         import: "default",
         eager: true,

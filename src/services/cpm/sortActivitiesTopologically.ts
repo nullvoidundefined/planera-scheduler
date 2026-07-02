@@ -10,13 +10,13 @@ export function sortActivitiesTopologically(graph: ScheduleGraph): Activity[] {
     const { inDegree, adjacency } = buildGraphStructures(graph);
     const activityMap = buildActivityMap(graph.activities);
     const queue = collectZeroInDegreeNodes(inDegree);
-    const sorted: Activity[] = [];
+    const sortedActivities: Activity[] = [];
 
     while (queue.length > 0) {
         const currentId = queue.shift()!;
         const activity = activityMap.get(currentId);
         if (activity !== undefined) {
-            sorted.push(activity);
+            sortedActivities.push(activity);
         }
 
         const neighbors = adjacency.get(currentId) ?? [];
@@ -29,11 +29,11 @@ export function sortActivitiesTopologically(graph: ScheduleGraph): Activity[] {
         }
     }
 
-    if (sorted.length !== graph.activities.length) {
+    if (sortedActivities.length !== graph.activities.length) {
         throw new Error("Graph contains a cycle: topological sort is not possible.");
     }
 
-    return sorted;
+    return sortedActivities;
 }
 
 function buildActivityMap(activities: Activity[]): Map<string, Activity> {

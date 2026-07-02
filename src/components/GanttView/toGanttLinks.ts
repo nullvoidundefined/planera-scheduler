@@ -6,13 +6,7 @@
 import { RELATIONSHIP_TO_DHTMLX_LINK_TYPE } from "../../constants/ganttScale";
 import type { Dependency } from "../../types/schedule";
 
-export interface GanttLink {
-    id: string;
-    lag: number;
-    source: string;
-    target: string;
-    type: string;
-}
+import type { GanttLink } from "./types";
 
 export function toGanttLinks(dependencies: Dependency[]): GanttLink[] {
     return dependencies.map((dependency) => ({

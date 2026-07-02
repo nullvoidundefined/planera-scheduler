@@ -20,21 +20,21 @@ vi.mock("../../workers/createCpmWorker", () => ({
     createCpmWorker: (): typeof fakeWorker => fakeWorker,
 }));
 
-function task(id: string, durationDays: number): Activity {
+function buildTask(id: string, durationDays: number): Activity {
     return { durationDays, id, name: id, parentId: "ph", type: "task", wbs: id };
 }
 
-function edge(id: string, predecessorId: string, successorId: string): Dependency {
+function buildEdge(id: string, predecessorId: string, successorId: string): Dependency {
     return { id, lagDays: 0, predecessorId, successorId, type: "FS" };
 }
 
 const GRAPH: ScheduleGraph = {
     activities: [
         { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
-        task("a", 5),
-        task("b", 3),
+        buildTask("a", 5),
+        buildTask("b", 3),
     ],
-    dependencies: [edge("e1", "a", "b")],
+    dependencies: [buildEdge("e1", "a", "b")],
 };
 
 describe("useScheduleStore worker delta sequencing", () => {
@@ -45,18 +45,22 @@ describe("useScheduleStore worker delta sequencing", () => {
 
     test("ignores a stale worker delta whose token predates a newer dispatch", () => {
         // Dispatch one: the store wires the first worker handler (token 1).
-        useScheduleStore.getState().dispatchOperation(
-            { activityId: "a", durationDays: 8, kind: "resizeActivity" },
-            "table",
-        );
+        useScheduleStore
+            .getState()
+            .dispatchOperation(
+                { activityId: "a", durationDays: 8, kind: "resizeActivity" },
+                "table",
+            );
         const staleHandler = fakeWorker.onmessage;
         expect(staleHandler).not.toBeNull();
 
         // Dispatch two: a newer operation advances the token to 2 and rewires onmessage.
-        useScheduleStore.getState().dispatchOperation(
-            { activityId: "a", durationDays: 6, kind: "resizeActivity" },
-            "table",
-        );
+        useScheduleStore
+            .getState()
+            .dispatchOperation(
+                { activityId: "a", durationDays: 6, kind: "resizeActivity" },
+                "table",
+            );
         const freshHandler = fakeWorker.onmessage;
         expect(freshHandler).not.toBeNull();
 

@@ -3,40 +3,40 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { useScheduleStore } from "../../state/scheduleStore";
 import type { Activity, Dependency, ScheduleGraph } from "../../types/schedule";
 
-function task(id: string, durationDays: number, parentId: string): Activity {
+function buildTask(id: string, durationDays: number, parentId: string): Activity {
     return { durationDays, id, name: id, parentId, type: "task", wbs: id };
 }
 
-function edge(id: string, predecessorId: string, successorId: string): Dependency {
+function buildEdge(id: string, predecessorId: string, successorId: string): Dependency {
     return { id, lagDays: 0, predecessorId, successorId, type: "FS" };
 }
 
 const GRAPH: ScheduleGraph = {
     activities: [
         { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
-        task("a", 5, "ph"),
-        task("b", 3, "ph"),
+        buildTask("a", 5, "ph"),
+        buildTask("b", 3, "ph"),
     ],
-    dependencies: [edge("e1", "a", "b")],
+    dependencies: [buildEdge("e1", "a", "b")],
 };
 
 const FLOAT_GRAPH: ScheduleGraph = {
     activities: [
         { durationDays: 0, id: "ph", name: "Phase", parentId: null, type: "group", wbs: "1" },
-        task("S", 0, "ph"),
-        task("A", 4, "ph"),
-        task("B", 2, "ph"),
-        task("C", 5, "ph"),
-        task("D", 3, "ph"),
-        task("E", 0, "ph"),
+        buildTask("S", 0, "ph"),
+        buildTask("A", 4, "ph"),
+        buildTask("B", 2, "ph"),
+        buildTask("C", 5, "ph"),
+        buildTask("D", 3, "ph"),
+        buildTask("E", 0, "ph"),
     ],
     dependencies: [
-        edge("S->A", "S", "A"),
-        edge("S->B", "S", "B"),
-        edge("A->C", "A", "C"),
-        edge("B->D", "B", "D"),
-        edge("C->E", "C", "E"),
-        edge("D->E", "D", "E"),
+        buildEdge("S->A", "S", "A"),
+        buildEdge("S->B", "S", "B"),
+        buildEdge("A->C", "A", "C"),
+        buildEdge("B->D", "B", "D"),
+        buildEdge("C->E", "C", "E"),
+        buildEdge("D->E", "D", "E"),
     ],
 };
 
@@ -64,11 +64,11 @@ describe("useScheduleStore", () => {
 
     test("addDependency inserts the edge and recomputes", () => {
         useScheduleStore.getState().loadGraph({
-            activities: [task("a", 5, "ph"), task("b", 3, "ph"), task("c", 2, "ph")],
+            activities: [buildTask("a", 5, "ph"), buildTask("b", 3, "ph"), buildTask("c", 2, "ph")],
             dependencies: [],
         });
         const result = useScheduleStore.getState().dispatchOperation({
-            edge: edge("e9", "b", "c"),
+            edge: buildEdge("e9", "b", "c"),
             kind: "addDependency",
         });
         expect(result.ok).toBe(true);

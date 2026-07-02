@@ -6,16 +6,18 @@
 import { createBrowserRouter, type RouteObject } from "react-router-dom";
 
 import { SiteShell } from "../components/SiteShell/SiteShell";
-import { ArchitectureRoute } from "../routes/ArchitectureRoute/ArchitectureRoute";
-import { DemoRoute } from "../routes/DemoRoute/DemoRoute";
-import { SummaryRoute } from "../routes/SummaryRoute/SummaryRoute";
+import { ROUTE_ARCHITECTURE_SEGMENT, ROUTE_DEMO_SEGMENT } from "../constants/routes";
+
+import { ArchitectureRoute } from "./ArchitectureRoute";
+import { DemoRoute } from "./DemoRoute";
+import { SummaryRoute } from "./SummaryRoute";
 
 export const appRoutes: RouteObject[] = [
     {
         children: [
             { element: <SummaryRoute />, index: true },
-            { element: <DemoRoute />, path: "demo" },
-            { element: <ArchitectureRoute />, path: "architecture" },
+            { element: <DemoRoute />, path: ROUTE_DEMO_SEGMENT },
+            { element: <ArchitectureRoute />, path: ROUTE_ARCHITECTURE_SEGMENT },
         ],
         element: <SiteShell />,
     },

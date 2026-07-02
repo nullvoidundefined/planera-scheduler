@@ -7,7 +7,7 @@
  * resolver needs only an id-then-parent lookup. Wired into gantt.templates.task_class
  * alongside resolveCriticalTaskClass, which the caller composes onto the result.
  */
-import type { GanttTask } from "./toGanttTasks";
+import type { GanttTask } from "./types";
 
 const LEAF_CLASS_PREFIX = "phase-";
 const SUMMARY_CLASS_PREFIX = "phase-summary-";

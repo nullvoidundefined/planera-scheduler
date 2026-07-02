@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { AI_FIRST_SECTION } from "../../content/aiFirstContent";
+import { AI_FIRST_SECTION } from "../../data/aiFirstContent";
 
 describe("AI-first section", () => {
     test("is the 'How I built this' section and splits judgment from leverage", () => {

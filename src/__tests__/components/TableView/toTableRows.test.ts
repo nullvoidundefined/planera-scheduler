@@ -3,7 +3,12 @@ import { describe, expect, test } from "vitest";
 import { toTableRows } from "../../../components/TableView/toTableRows";
 import type { ComputedActivity, ScheduleGraph } from "../../../types/schedule";
 
-function computed(id: string, earlyStart: number, earlyFinish: number, isCritical: boolean): ComputedActivity {
+function computed(
+    id: string,
+    earlyStart: number,
+    earlyFinish: number,
+    isCritical: boolean,
+): ComputedActivity {
     return {
         earlyFinish,
         earlyStart,

@@ -5,6 +5,7 @@
  * the maximum descendant lateFinish. A group is critical when any descendant leaf
  * is critical. Groups with no computed descendants are omitted from the result.
  */
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
 import type { Activity, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
 export function computeSummaries(
@@ -15,7 +16,7 @@ export function computeSummaries(
     const summaries = new Map<string, ComputedActivity>();
 
     for (const activity of graph.activities) {
-        if (activity.type === "group") {
+        if (activity.type === ACTIVITY_TYPE_GROUP) {
             const leaves = collectDescendantComputed(activity.id, childrenByParent, computed);
             const summary = summarizeLeaves(activity.id, leaves);
             if (summary !== null) {
@@ -49,7 +50,7 @@ function collectDescendantComputed(
 
     while (stack.length > 0) {
         const child = stack.pop()!;
-        if (child.type === "group") {
+        if (child.type === ACTIVITY_TYPE_GROUP) {
             stack.push(...(childrenByParent.get(child.id) ?? []));
         } else {
             const leafComputed = computed.get(child.id);

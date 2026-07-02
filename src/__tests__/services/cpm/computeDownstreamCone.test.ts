@@ -6,7 +6,7 @@ import { selectLeafActivities } from "../../../services/cpm/selectLeafActivities
 import { generateSchedule } from "../../../services/generateSchedule";
 import type { ComputedActivity, ScheduleGraph } from "../../../types/schedule";
 
-function fullCompute(graph: ScheduleGraph): Map<string, ComputedActivity> {
+function computeFullSchedule(graph: ScheduleGraph): Map<string, ComputedActivity> {
     const result = computeSchedule(selectLeafActivities(graph));
     if (!result.ok) {
         throw new Error("fixture unexpectedly cyclic");
@@ -28,7 +28,7 @@ describe("computeDownstreamCone", () => {
     test("the delta merged into the previous cache equals a full recompute", () => {
         const graph = generateSchedule({ activityCount: 120, seed: 4 });
         const leaves = graph.activities.filter((activity) => activity.type !== "group");
-        let cache = fullCompute(graph);
+        let cache = computeFullSchedule(graph);
         const rand = makePrng(99);
 
         for (let step = 0; step < 40; step++) {
@@ -42,14 +42,14 @@ describe("computeDownstreamCone", () => {
             }
 
             expect(merged).toEqual(computed);
-            expect(merged).toEqual(fullCompute(graph));
+            expect(merged).toEqual(computeFullSchedule(graph));
             cache = merged;
         }
     });
 
     test("delta is empty when nothing changed", () => {
         const graph = generateSchedule({ activityCount: 60, seed: 2 });
-        const cache = fullCompute(graph);
+        const cache = computeFullSchedule(graph);
         const { delta } = computeDownstreamCone(selectLeafActivities(graph), cache);
         expect(delta).toEqual([]);
     });

@@ -5,7 +5,7 @@
  * encodes the tree path and parentId builds the hierarchy. Dates are never stored;
  * ComputedActivity holds the engine's outputs.
  */
-import { RELATIONSHIP_TYPES } from "../constants/schedule";
+import { RELATIONSHIP_TYPES } from "../constants/relationshipTypes";
 
 export type ActivityType = "task" | "milestone" | "group";
 

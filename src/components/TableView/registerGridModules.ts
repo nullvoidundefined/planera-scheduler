@@ -7,12 +7,12 @@
 import { ModuleRegistry } from "ag-grid-community";
 import { AllEnterpriseModule } from "ag-grid-enterprise";
 
-let registered = false;
+let isRegistered = false;
 
 export function registerGridModules(): void {
-    if (registered) {
+    if (isRegistered) {
         return;
     }
     ModuleRegistry.registerModules([AllEnterpriseModule]);
-    registered = true;
+    isRegistered = true;
 }

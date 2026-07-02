@@ -6,7 +6,7 @@ import { selectLeafActivities } from "../../../services/cpm/selectLeafActivities
 import { generateSchedule } from "../../../services/generateSchedule";
 import type { ComputedActivity, ScheduleGraph } from "../../../types/schedule";
 
-function fullCompute(graph: ScheduleGraph): Map<string, ComputedActivity> {
+function computeFullSchedule(graph: ScheduleGraph): Map<string, ComputedActivity> {
     const result = computeSchedule(selectLeafActivities(graph));
     if (!result.ok) {
         throw new Error("fixture unexpectedly cyclic");
@@ -14,7 +14,7 @@ function fullCompute(graph: ScheduleGraph): Map<string, ComputedActivity> {
     return result.activities;
 }
 
-function stale(
+function buildStaleActivity(
     id: string,
     earlyStart: number,
     earlyFinish: number,
@@ -37,7 +37,7 @@ describe("computeConeEarlyDates", () => {
     test("phase-1 early dates match a full computeSchedule for every cone member", () => {
         const graph = generateSchedule({ activityCount: 120, seed: 4 });
         const leaves = graph.activities.filter((activity) => activity.type !== "group");
-        const previousComputed = fullCompute(graph);
+        const previousComputed = computeFullSchedule(graph);
 
         const target = leaves[10];
         target.durationDays += 7;
@@ -47,7 +47,7 @@ describe("computeConeEarlyDates", () => {
             [target.id],
             previousComputed,
         );
-        const authoritative = fullCompute(graph);
+        const authoritative = computeFullSchedule(graph);
 
         expect(coneDelta.length).toBeGreaterThan(0);
         for (const entry of coneDelta) {
@@ -73,9 +73,9 @@ describe("computeConeEarlyDates", () => {
         // Tamper a's cached early finish to a sentinel so the assertion proves the cone
         // reads it verbatim from previousComputed instead of recomputing activity "a".
         const previousComputed = new Map<string, ComputedActivity>([
-            ["a", stale("a", 0, 100, 0, 100, false)],
-            ["b", stale("b", 5, 8, 5, 8, true)],
-            ["c", stale("c", 8, 10, 8, 10, false)],
+            ["a", buildStaleActivity("a", 0, 100, 0, 100, false)],
+            ["b", buildStaleActivity("b", 5, 8, 5, 8, true)],
+            ["c", buildStaleActivity("c", 8, 10, 8, 10, false)],
         ]);
 
         const coneDelta = computeConeEarlyDates(graph, ["b"], previousComputed);

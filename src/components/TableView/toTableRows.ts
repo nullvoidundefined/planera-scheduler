@@ -5,23 +5,11 @@
  * hierarchy. Group rows are rolled up from descendant summaries; leaf rows carry
  * the engine's computed dates, float, and critical flag.
  */
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
 import { computeSummaries } from "../../services/cpm/computeSummaries";
-import type { Activity, ActivityType, ComputedActivity, ScheduleGraph } from "../../types/schedule";
+import type { Activity, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
-const GROUP_ACTIVITY_TYPE = "group";
-
-export interface TableRow {
-    critical: boolean;
-    duration: number;
-    earlyFinish: number;
-    earlyStart: number;
-    id: string;
-    name: string;
-    path: string[];
-    totalFloat: number;
-    type: ActivityType;
-    wbs: string;
-}
+import type { TableRow } from "./types";
 
 export function toTableRows(
     graph: ScheduleGraph,
@@ -39,7 +27,9 @@ function resolveComputed(
     computed: Map<string, ComputedActivity>,
     summaries: Map<string, ComputedActivity>,
 ): ComputedActivity | undefined {
-    return activity.type === "group" ? summaries.get(activity.id) : computed.get(activity.id);
+    return activity.type === ACTIVITY_TYPE_GROUP
+        ? summaries.get(activity.id)
+        : computed.get(activity.id);
 }
 
 function toTableRow(
@@ -63,8 +53,11 @@ function toTableRow(
 
 // Group rows show their rolled-up span (summary finish minus start), never the
 // stored durationDays, which is 0 for a group. Leaf rows keep their own duration.
-function resolveDuration(activity: Activity, computedActivity: ComputedActivity | undefined): number {
-    if (activity.type === GROUP_ACTIVITY_TYPE) {
+function resolveDuration(
+    activity: Activity,
+    computedActivity: ComputedActivity | undefined,
+): number {
+    if (activity.type === ACTIVITY_TYPE_GROUP) {
         return computedActivity === undefined
             ? 0
             : computedActivity.earlyFinish - computedActivity.earlyStart;

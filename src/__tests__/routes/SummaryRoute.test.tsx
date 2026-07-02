@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, test } from "vitest";
 
-import { SummaryRoute } from "../../../routes/SummaryRoute/SummaryRoute";
+import { SummaryRoute } from "../../routes/SummaryRoute";
 
 function renderRoute(): void {
     render(

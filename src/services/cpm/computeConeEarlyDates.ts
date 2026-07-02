@@ -8,7 +8,7 @@
  * isCritical copied verbatim from previousComputed, which phase 2 (the worker's
  * full computeDownstreamCone pass) corrects a beat later.
  */
-import type { ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
+import type { Activity, ComputedActivity, Dependency, ScheduleGraph } from "../../types/schedule";
 
 import { earlyStartFromDependency } from "./earlyStartFromDependency";
 import { selectDownstreamCone } from "./selectDownstreamCone";
@@ -26,38 +26,13 @@ export function computeConeEarlyDates(
         cone.has(activity.id),
     );
 
-    const earlyStart = new Map<string, number>();
-    const earlyFinish = new Map<string, number>();
-    const delta: ComputedActivity[] = [];
-
-    for (const activity of orderedConeActivities) {
-        const stale = previousComputed.get(activity.id);
-        if (stale === undefined) {
-            throw new Error(
-                `computeConeEarlyDates: cone activity ${activity.id} is missing from previousComputed`,
-            );
-        }
-
-        const activityDuration = durations.get(activity.id) ?? 0;
-        const predecessors = dependenciesBySuccessor.get(activity.id) ?? [];
-
-        let start = 0;
-        for (const dependency of predecessors) {
-            const candidate = earlyStartFromDependency(
-                dependency,
-                readEarlyStart(dependency.predecessorId, cone, earlyStart, previousComputed),
-                readEarlyFinish(dependency.predecessorId, cone, earlyFinish, previousComputed),
-                activityDuration,
-            );
-            start = Math.max(start, candidate);
-        }
-
-        earlyStart.set(activity.id, start);
-        earlyFinish.set(activity.id, start + activityDuration);
-        delta.push({ ...stale, earlyFinish: start + activityDuration, earlyStart: start });
-    }
-
-    return delta;
+    return runConeForwardPass(
+        orderedConeActivities,
+        dependenciesBySuccessor,
+        durations,
+        cone,
+        previousComputed,
+    );
 }
 
 function collectChangedCone(leafGraph: ScheduleGraph, changedActivityIds: string[]): Set<string> {
@@ -86,6 +61,47 @@ function buildDurationMap(graph: ScheduleGraph): Map<string, number> {
         durations.set(activity.id, activity.durationDays);
     }
     return durations;
+}
+
+function runConeForwardPass(
+    orderedConeActivities: Activity[],
+    dependenciesBySuccessor: Map<string, Dependency[]>,
+    durations: Map<string, number>,
+    cone: Set<string>,
+    previousComputed: Map<string, ComputedActivity>,
+): ComputedActivity[] {
+    const earlyStart = new Map<string, number>();
+    const earlyFinish = new Map<string, number>();
+    const delta: ComputedActivity[] = [];
+
+    for (const activity of orderedConeActivities) {
+        const staleComputed = previousComputed.get(activity.id);
+        if (staleComputed === undefined) {
+            throw new Error(
+                `computeConeEarlyDates: cone activity ${activity.id} is missing from previousComputed`,
+            );
+        }
+
+        const activityDuration = durations.get(activity.id) ?? 0;
+        const predecessors = dependenciesBySuccessor.get(activity.id) ?? [];
+
+        let start = 0;
+        for (const dependency of predecessors) {
+            const candidate = earlyStartFromDependency(
+                dependency,
+                readEarlyStart(dependency.predecessorId, cone, earlyStart, previousComputed),
+                readEarlyFinish(dependency.predecessorId, cone, earlyFinish, previousComputed),
+                activityDuration,
+            );
+            start = Math.max(start, candidate);
+        }
+
+        earlyStart.set(activity.id, start);
+        earlyFinish.set(activity.id, start + activityDuration);
+        delta.push({ ...staleComputed, earlyFinish: start + activityDuration, earlyStart: start });
+    }
+
+    return delta;
 }
 
 function readEarlyStart(

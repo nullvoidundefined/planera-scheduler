@@ -22,25 +22,25 @@ export function createCalendar(options?: {
     }
 
     function addWorkingDays(start: Date, count: number): Date {
-        let current = start;
+        let currentDate = start;
         let remaining = count;
         while (remaining > 0) {
-            current = addDays(current, 1);
-            if (isWorkingDay(current)) {
+            currentDate = addDays(currentDate, 1);
+            if (isWorkingDay(currentDate)) {
                 remaining--;
             }
         }
-        return current;
+        return currentDate;
     }
 
     function dateFromIndex(index: number): Date {
-        let current = epochWorkingDay;
+        let currentDate = epochWorkingDay;
         for (let i = 0; i < index; i++) {
             do {
-                current = addDays(current, 1);
-            } while (!isWorkingDay(current));
+                currentDate = addDays(currentDate, 1);
+            } while (!isWorkingDay(currentDate));
         }
-        return current;
+        return currentDate;
     }
 
     function indexFromDate(date: Date): number {
@@ -52,11 +52,11 @@ export function createCalendar(options?: {
                 `indexFromDate: ${toISODateString(date)} is before the epoch's first working day (${toISODateString(epochWorkingDay)})`,
             );
         }
-        let current = epochWorkingDay;
+        let currentDate = epochWorkingDay;
         let index = 0;
-        while (current.getTime() < date.getTime()) {
-            current = addDays(current, 1);
-            if (isWorkingDay(current)) {
+        while (currentDate.getTime() < date.getTime()) {
+            currentDate = addDays(currentDate, 1);
+            if (isWorkingDay(currentDate)) {
                 index++;
             }
         }
@@ -71,11 +71,14 @@ function findFirstWorkingDay(
     workWeek: readonly number[],
     holidaySet: Set<string>,
 ): Date {
-    let current = from;
-    while (!workWeek.includes(current.getUTCDay()) || holidaySet.has(toISODateString(current))) {
-        current = addDays(current, 1);
+    let currentDate = from;
+    while (
+        !workWeek.includes(currentDate.getUTCDay()) ||
+        holidaySet.has(toISODateString(currentDate))
+    ) {
+        currentDate = addDays(currentDate, 1);
     }
-    return current;
+    return currentDate;
 }
 
 function addDays(date: Date, days: number): Date {

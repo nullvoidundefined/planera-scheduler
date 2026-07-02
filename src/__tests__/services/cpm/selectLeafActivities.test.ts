@@ -11,7 +11,13 @@ function group(id: string, parentId: string | null): Activity {
     return { durationDays: 0, id, name: id, parentId, type: "group", wbs: "1" };
 }
 
-const EDGE: Dependency = { id: "e1", lagDays: 0, predecessorId: "t1", successorId: "t2", type: "FS" };
+const EDGE: Dependency = {
+    id: "e1",
+    lagDays: 0,
+    predecessorId: "t1",
+    successorId: "t2",
+    type: "FS",
+};
 
 const GRAPH: ScheduleGraph = {
     activities: [group("p", null), group("ph", "p"), leaf("t1", "ph"), leaf("t2", "ph")],
@@ -34,7 +40,10 @@ describe("selectLeafActivities", () => {
             type: "milestone",
             wbs: "1",
         };
-        const result = selectLeafActivities({ activities: [group("p", null), milestone], dependencies: [] });
+        const result = selectLeafActivities({
+            activities: [group("p", null), milestone],
+            dependencies: [],
+        });
         expect(result.activities.map((activity) => activity.id)).toEqual(["m1"]);
     });
 });

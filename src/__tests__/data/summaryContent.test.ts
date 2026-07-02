@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../../content/summaryContent";
+import { SUMMARY_HEADING, SUMMARY_PARAGRAPHS } from "../../data/summaryContent";
 
 describe("summary content", () => {
     test("leads with the met-the-team framing", () => {
