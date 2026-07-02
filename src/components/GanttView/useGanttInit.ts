@@ -18,6 +18,7 @@ import type { ZoomLevel } from "dhtmlx-gantt";
 import { useEffect } from "react";
 import type { RefObject } from "react";
 
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
 import { DEFAULT_WORK_WEEK } from "../../constants/calendar";
 import { DEFAULT_DAY_WIDTH_PX } from "../../constants/ganttScale";
 import {
@@ -43,15 +44,15 @@ import { toGanttLinks } from "./toGanttLinks";
 import { toGanttTasks } from "./toGanttTasks";
 
 const CP_STAR_HTML = '<span class="cp-star">★</span>';
-const DAY_SCALE_HEIGHT_PX = 27;
 const DAYS_PER_WEEK = 7;
+const DAY_SCALE_HEIGHT_PX = 27;
 const GANTT_BAR_HEIGHT_PX = 18;
 const GANTT_DATE_FORMAT = "%Y-%m-%d %H:%i";
 const GANTT_DURATION_UNIT = "day";
 const GANTT_GRID_WIDTH_PX = 920;
 const GANTT_RESIZER_WIDTH_PX = 8;
 const GANTT_ROW_HEIGHT_PX = 30;
-const GROUP_ACTIVITY_TYPE = "group";
+const GANTT_SCROLLBAR_HEIGHT_PX = 20;
 const MIN_BAR_DURATION_DAYS = 1;
 const MONTH_COLUMN_WIDTH_PX = 120;
 const MULTI_SCALE_HEIGHT_PX = 50;
@@ -73,7 +74,7 @@ const GANTT_LAYOUT = {
                 { id: "scrollVer", scroll: "y", view: "scrollbar" },
             ],
         },
-        { height: 20, id: "scrollHor", scroll: "x", view: "scrollbar" },
+        { height: GANTT_SCROLLBAR_HEIGHT_PX, id: "scrollHor", scroll: "x", view: "scrollbar" },
     ],
 };
 
@@ -111,7 +112,7 @@ const ZOOM_LEVELS: { current: string; levels: ZoomLevel[] } = {
 // programmatically, which fires onTaskOpened/onTaskClosed. Dispatching for those
 // would flip the shared collapsed set back and oscillate forever, so the handler
 // dispatches only when this flag is clear (a genuine user chevron click).
-let suppressCollapseEcho = false;
+let shouldSuppressCollapseEcho = false;
 
 // The phase -> color index map for the loaded schedule, derived once from the full
 // activity list at init and read by the task_class template to paint each bar its
@@ -277,7 +278,7 @@ function attachCollapseHandlers(): () => void {
 }
 
 function handleCollapseToggle(taskId: string | number): boolean {
-    if (!suppressCollapseEcho) {
+    if (!shouldSuppressCollapseEcho) {
         useScheduleStore
             .getState()
             .dispatchOperation(
@@ -290,15 +291,16 @@ function handleCollapseToggle(taskId: string | number): boolean {
 
 function subscribeComputed(calendar: ReturnType<typeof createCalendar>): () => void {
     return useScheduleStore.subscribe((state, previous) => {
-        if (state.computed === previous.computed) {
+        const { computed, lastOperationOrigin } = state;
+        if (computed === previous.computed) {
             return;
         }
         // Skip echoing the Gantt's own drag: the bar already reflects the user's
         // drag, so re-applying the store update it triggered would be redundant work.
-        if (state.lastOperationOrigin === OPERATION_ORIGIN_GANTT) {
+        if (lastOperationOrigin === OPERATION_ORIGIN_GANTT) {
             return;
         }
-        applyComputedToGantt(state.computed, calendar);
+        applyComputedToGantt(computed, calendar);
     });
 }
 
@@ -324,10 +326,10 @@ function subscribeCollapse(): () => void {
 
 function applyCollapseToGantt(collapsed: Set<string>): void {
     const { graph } = useScheduleStore.getState();
-    suppressCollapseEcho = true;
+    shouldSuppressCollapseEcho = true;
     gantt.batchUpdate(() => {
         for (const activity of graph.activities) {
-            if (activity.type !== GROUP_ACTIVITY_TYPE || !gantt.isTaskExists(activity.id)) {
+            if (activity.type !== ACTIVITY_TYPE_GROUP || !gantt.isTaskExists(activity.id)) {
                 continue;
             }
             const shouldCollapse = collapsed.has(activity.id);
@@ -339,7 +341,7 @@ function applyCollapseToGantt(collapsed: Set<string>): void {
             }
         }
     });
-    suppressCollapseEcho = false;
+    shouldSuppressCollapseEcho = false;
 }
 
 function applyComputedToGantt(

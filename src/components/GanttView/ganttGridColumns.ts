@@ -12,12 +12,12 @@ import type { GridColumn, Task } from "dhtmlx-gantt";
 
 import { formatDateLabel } from "../../services/formatDateLabel";
 
+const CRITICAL_COLUMN_WIDTH_PX = 56;
 const CRITICAL_TAG_HTML = '<span class="gantt-critical-tag">★ CP</span>';
 const DURATION_COLUMN_WIDTH_PX = 96;
 const EMPTY_CELL = "";
 const FINISH_COLUMN_WIDTH_PX = 104;
 const FLOAT_COLUMN_WIDTH_PX = 88;
-const CRITICAL_COLUMN_WIDTH_PX = 56;
 const NAME_COLUMN_MIN_WIDTH_PX = 200;
 const NAME_COLUMN_WIDTH = "*";
 const START_COLUMN_WIDTH_PX = 104;

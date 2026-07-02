@@ -8,13 +8,14 @@
  */
 import { gantt } from "dhtmlx-gantt";
 
+const GANTT_GRID_CELL_SELECTOR = ".grid_cell";
 const GANTT_GRID_RESIZE_HANDLE_CLASS = "gantt-grid-resize-handle";
 const GRID_WIDTH_MAX_PX = 1400;
 const GRID_WIDTH_MIN_PX = 320;
 const HANDLE_HALF_WIDTH_PX = 4;
 
 export function attachGridResizer(container: HTMLDivElement): () => void {
-    const gridCell = container.querySelector<HTMLElement>(".grid_cell");
+    const gridCell = container.querySelector<HTMLElement>(GANTT_GRID_CELL_SELECTOR);
     if (gridCell === null) {
         return () => {};
     }
@@ -31,7 +32,7 @@ export function attachGridResizer(container: HTMLDivElement): () => void {
 
     // Arrow functions so TypeScript propagates the const-narrowed gridCell type into
     // the closure body (function declarations are treated as hoisted and lose narrowing).
-    const onMouseMove = (event: MouseEvent): void => {
+    const handleMouseMove = (event: MouseEvent): void => {
         latestMouseX = event.clientX;
         if (pendingAnimationFrame !== null) {
             return;
@@ -45,9 +46,9 @@ export function attachGridResizer(container: HTMLDivElement): () => void {
         });
     };
 
-    const onMouseUp = (): void => {
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
+    const handleMouseUp = (): void => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
         if (pendingAnimationFrame !== null) {
@@ -56,21 +57,21 @@ export function attachGridResizer(container: HTMLDivElement): () => void {
         }
     };
 
-    const onMouseDown = (event: MouseEvent): void => {
+    const handleMouseDown = (event: MouseEvent): void => {
         event.preventDefault();
         latestMouseX = event.clientX;
         startGridWidth = gantt.config.grid_width;
         startMouseX = event.clientX;
         document.body.style.cursor = "col-resize";
         document.body.style.userSelect = "none";
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
     };
 
-    handle.addEventListener("mousedown", onMouseDown);
+    handle.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-        handle.removeEventListener("mousedown", onMouseDown);
+        handle.removeEventListener("mousedown", handleMouseDown);
         handle.remove();
     };
 }

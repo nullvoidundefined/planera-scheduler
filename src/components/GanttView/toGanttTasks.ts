@@ -6,12 +6,14 @@
  * the calendar, never read from stored fields. Each row also carries the custom
  * wbs, totalFloat, and isCritical properties the native grid columns render.
  */
+import { ACTIVITY_TYPE_GROUP } from "../../constants/activityType";
 import { computeSummaries } from "../../services/cpm/computeSummaries";
 import type { Calendar } from "../../types/calendar";
 import type { Activity, ComputedActivity, ScheduleGraph } from "../../types/schedule";
 
 import type { GanttTask } from "./types";
 
+const DHTMLX_TASK_TYPE_PROJECT = "project";
 const MIN_BAR_DURATION_DAYS = 1;
 const ROOT_PARENT = "0";
 
@@ -31,7 +33,9 @@ function resolveComputed(
     computed: Map<string, ComputedActivity>,
     summaries: Map<string, ComputedActivity>,
 ): ComputedActivity | undefined {
-    return activity.type === "group" ? summaries.get(activity.id) : computed.get(activity.id);
+    return activity.type === ACTIVITY_TYPE_GROUP
+        ? summaries.get(activity.id)
+        : computed.get(activity.id);
 }
 
 function toGanttTask(
@@ -61,7 +65,7 @@ function toGanttTask(
 function toGanttTaskType(type: Activity["type"]): string {
     switch (type) {
         case "group":
-            return "project";
+            return DHTMLX_TASK_TYPE_PROJECT;
         case "milestone":
             return "milestone";
         case "task":
