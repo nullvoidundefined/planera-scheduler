@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { fetchScheduleGraph } from "../api/fetchScheduleGraph";
+
 import { useScheduleStore } from "./scheduleStore";
 
 const SCHEDULE_QUERY_KEY = ["schedule"] as const;

@@ -18,9 +18,9 @@ import { detectCycle } from "../services/cpm/detectCycle";
 import { selectLeafActivities } from "../services/cpm/selectLeafActivities";
 import type { Operation, OperationOrigin } from "../types/operation";
 import type { ComputedActivity, ScheduleGraph } from "../types/schedule";
-import type { CpmWorkerRequest } from "../workers/types";
 import { createCpmWorker } from "../workers/createCpmWorker";
 import { handleWorkerMessage } from "../workers/handleWorkerMessage";
+import type { CpmWorkerRequest } from "../workers/types";
 
 interface ScheduleState {
     collapsed: Set<string>;
